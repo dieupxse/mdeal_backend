@@ -1,0 +1,127 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package vn.ctnet.mdeal.bo;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.SQLException;
+import java.util.Date;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import vn.ctnet.dao.SmsMoDAO;
+import vn.ctnet.entity.SmsMo;
+
+/**
+ *
+ * @author vanvtse90186
+ */
+public class SMSReciever {
+
+    public String recieverSMS(String message, String msisdn, String destAdd) {
+        SmsMoDAO smsDAO = new SmsMoDAO();
+        Date d = new Date();
+
+        //SmsMoJpaController smsmoctl = new SmsMoJpaController(fact);
+        SmsMo smsmo = new SmsMo();
+        smsmo.setChanel("SMS");
+        smsmo.setMessage(message);
+        smsmo.setRecTime(d);
+        smsmo.setReciever(msisdn);
+        smsmo.setSender(destAdd);
+        smsmo.setOperator("VMS");
+        smsmo.setPaidStatus("");
+        smsmo.setStatus("PRE");
+        smsmo.setSmsID(Long.valueOf("0"));
+
+        try {
+            smsDAO.insert(smsmo);
+            Dotransaction(message, msisdn, smsmo.getSmsID());
+        } catch (ClassNotFoundException | SQLException ex) {
+            Logger.getLogger(SMSReciever.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return "0";
+    }
+
+    public String Dotransaction(String message, String msisdn, long smsID) throws ClassNotFoundException, SQLException {
+        String rsp = "";
+        if ("".equals(message) || message == null) {
+            System.out.println("Message = null");
+            message = message + "";
+        }
+        message = message.replaceAll("\\s+", " ");
+        String[] action = message.trim().toUpperCase().split("\\s+");
+        SMSProcess exe = new SMSProcess();
+
+        try {
+
+            switch (action[0]) {
+                case "DK":
+                    //do
+                    if (action.length >= 2) {
+                        if (action[1] == null || "".equals(action[1])) {
+                            action[1] = "";
+                        }
+                        exe.register(msisdn, action[1], smsID, "SMS",null);
+                    } else {
+                        exe.register(msisdn, "D30", smsID, "SMS",null);
+                    }
+                    break;
+                case "HUY":
+                    //do
+                    exe.unregister(msisdn, action[1], (long) smsID, "SMS");
+                    break;
+                case "HD":
+                    exe.guideUser(msisdn, (long) 0);
+                    break;
+                case "KT":
+                    exe.checkProfile(msisdn, (long) 0, "SMS");
+                    break;
+                case "TAI":
+                    exe.tai(msisdn, (long) smsID);
+                    break;
+                default:
+                    System.out.println("Cu phap khong dung");
+                    String msg = getSms("msg_wrong");
+                    exe.sendSMS(msisdn, "9193", msg, (long) smsID);
+                    break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            String msg = getSms("msg_wrong");
+            exe.sendSMS(msisdn, "9193", msg, (long) smsID);
+        }
+        return "";
+    }
+    public  String getSms(String name) {
+
+        Properties prop = new Properties();
+        InputStream input = null;
+
+        try {
+            String path="C:\\mdeal_config\\sms.properties";
+            input = new FileInputStream(new File(path));
+
+            // load a properties file
+            prop.load(input);
+            return prop.getProperty(name);
+
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+            return "";
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+    }
+}

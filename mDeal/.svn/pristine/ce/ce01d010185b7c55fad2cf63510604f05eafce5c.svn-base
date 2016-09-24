@@ -1,0 +1,59 @@
+################################################
+#CAU HINH BAN TIN MT TRA VE CHO KHACH HANG
+#Cac tham so: 
+# {GOI} - Ten goi cuoc
+# {NGAY} - Han su dung cua goi cuoc tuong ung
+# {DATE} - Ngay het han cua goi cuoc
+# {GIA} - Gia cua goi cuoc tuong ung
+###############################################
+
+#sms dang ky thanh cong
+msg_dk_ok = Chuc mung Quy khach da dang ky thanh cong goi {GOI} cua DV the uu dai mDeal cua MobiFone (MIEN CUOC 3G/GPRS). Truy cap http://mdeal.vn de cap nhat ngay cac uu dai giam gia danh rieng cho ban. Huy DV soan: HUY {GOI} gui 9193. DV gia han voi cuoc phi: {GIA}d/{NGAY}ngay. Chi tiet goi 9090 (200d/phut).
+
+#sms loi he thong tra ve
+msg_err_sys = He thong dang ban. Quy khach vui long dang ky lai sau it phut. Cam on Quy khach da su dung dich vu.
+
+#sms dang ky that bai do tai khoan khong du
+msg_dk_fail = Tai khoan cua Quy khach khong du de dang ky dich vu. Vui long nap them tien vao tai khoan va dang ky lai. Truy cap http://mDeal.vn (MIEN CUOC 3G/GPRS) hoac LH 9090 (200d/phut) de biet them chi tiet.
+
+#sms gia han thanh cong
+msg_gh_ok = Goi cuoc {GOI} dich vu mDeal cua Quy khach da duoc gia han thanh cong, han su dung den ngay {DATE}. Truy cap  http://mDeal.vn de cap nhat ngay cac uu dai giam gia danh rieng cho ban (MIEN CUOC 3G/GPRS). Chi tiet goi 9090 (200d/phut).
+
+#sms gia han that bai
+msg_gh_fail = Goi cuoc {GOI} dich vu mDeal cua Quy khach da bi huy do tai khoan khong du tien. De dang ky su dung lai, vui long soan DK [ten goi] gui 9193 (goi D1 2.000d/ngay, D7 7000d/7 ngay, D30 20.000d/30 ngay, D90 50.000d/90 ngay). Truy cap  http://mDeal.vn de cap nhat ngay cac uu dai giam gia danh rieng cho ban (MIEN CUOC 3G/GPRS). Chi tiet goi 9090 (200d/phut).
+
+#sms gia han lan dau khong thanh cong, dua vao list retry, tra ve khach hang tai khoan dang tam khoa
+msg_gh_lock = Goi cuoc {GOI} dang tam khoa do gia han khong thanh cong. He thong se tiep tuc tru cuoc va gia han goi trong 30 ngay neu TKC cua Quy khach du tien. Truy cap  http://mDeal.vn de cap nhat ngay cac uu dai giam gia danh rieng cho ban (MIEN CUOC 3G/GPRS). Chi tiet goi 9090 (200d/phut).
+
+#sms dang ky thanh cong mien phi 7 ngay cho lan dang ky dau tien
+msg_free_7_day = Chuc mung Quy khach duoc MIEN PHI 7 ngay su dung DV the thanh vien mDeal cua MobiFone (MIEN CUOC 3G/GPRS). Truy cap http://mdeal.vn de cap nhat ngay cac uu dai giam gia danh rieng cho ban. Gia sau KM: {GIA}d/{NGAY}ngay. De huy dich vu, soan HUY {GOI} gui 9193. Chi tiet goi 9090 (200d/phut).
+
+#sms thong bao goi cuoc da ton tai khi dang su dung goi cuoc ma dang ky tiep
+msg_sv_exist = Quy khach dang su dung goi {GOI}. Truy cap http://mdeal.vn de cap nhat ngay cac uu dai giam gia danh rieng cho ban (MIEN CUOC 3G/GPRS). Chi tiet goi 9090 (200d/phut).
+
+#sms thong bao huy goi cuoc thanh cong
+msg_huy_ok = Quy khach da huy thanh cong goi {GOI}. De dang ky lai, vui long DK [ten goi] gui 9193 (goi D1 2.000d/ngay, D7 7000d/7 ngay, D30 20.000d/30 ngay, D90 50.000d/90 ngay). Truy cap http://mDeal.vn (MIEN CUOC 3G/GPRS) hoac LH 9090 (200d/phut) de biet them chi tiet.
+
+#sms thong bao huy goi cuoc khong thanh cong
+msg_huy_fail = Quy khach chua huy thanh cong goi {GOI}. Vui long thu lai sau it phut. Truy cap http://mDeal.vn (MIEN CUOC 3G/GPRS) hoac LH 9090 (200d/phut) de biet them chi tiet.
+
+#sms thong bao huy goi cuoc ma goi cuoc do chua dang ky
+msg_huy_not_exist = Quy khach chua dang ky goi {GOI}. Truy cap http://mDeal.vn (MIEN CUOC 3G/GPRS) hoac LH 9090 (200d/phut) de biet them chi tiet.
+
+#sms thong bao con 2 ngay la het han cho cac thue bao duoc mien phi 7 ngay
+msg_warning_free = Quy khach con 02 ngay su dung MIEN PHI dich vu mDeal cua Mobifone. Goi cuoc se duoc tu dong gia han neu quy khach khong co yeu cau huy. Truy cap http://mDeal.vn de cap nhat ngay cac uu dai giam gia danh rieng cho ban (MIEN CUOC 3G/GPRS). Chi tiet goi 9090 (200d/phut).
+
+#sms huong dan su dung dich vu
+msg_hd = Cam on Quy khach da quan tam den dich vu the thanh vien mDeal. Soan DK [tengoi] gui 9193 de dang ky dich vu. (DV duoc MIEN PHI 07 ngay dau tien, gia sau KM : Goi D1 2.000d/ngay, D7 7000d/7 ngay, D30 20.000d/30 ngay, D90 50.000d/90 ngay). Truy cap  http://mDeal.vn de cap nhat ngay cac uu dai giam gia danh rieng cho ban (MIEN CUOC 3G/GPRS). Chi tiet goi 9090 (200d/phut).
+
+#sms kiem tra thong tin dich vu
+msg_kt = Quy khach dang su dung goi {GOI} {GIA}d/{NGAY} ngay, han su dung den ngay {DATE}. Truy cap http://mDeal.vn de cap nhat ngay cac uu dai giam gia danh rieng cho ban (MIEN CUOC 3G/GPRS). Chi tiet goi 9090 (200d/phut).
+
+#sms nhan link tai dich vu
+msg_tai = Quy khach vui long truy cap link sau de tai ung dung dich vu the thanh vien mDeal (MIEN CUOC 3G/GPRS) http://mdeal.vn/client
+
+#sms thong bao sai cu phap
+msg_wrong = Yeu cau cua Quy khach chua duoc thuc hien do cu phap khong dung. Soan DK [Ten goi] gui 9193 de dang ky (goi D1 2.000d/ngay, D7 7000d/7 ngay, D30 20.000d/30 ngay, D90 50.000d/90 ngay). Truy cap http://mDeal.vn (MIEN CUOC 3G/GPRS) hoac LH 9090 (200d/phut) de biet them chi tiet.
+
+#sms thong bao thue bao chua dang ky goi cuoc cho lenh kiem tra
+msg_not_reg = Hien tai, Quy khach khong su dung goi cuoc nao. De dang ky, soan DK Tengoi gui 9193 [Tengoi: D1, D7, D30, D90]. Vi du, dang ky goi ngay: soan DK D1 gui 9193. Truy cap  http://mDeal.vn de cap nhat ngay cac uu dai giam gia danh rieng cho ban (MIEN CUOC 3G/GPRS). Chi tiet goi 9090 (200d/phut).

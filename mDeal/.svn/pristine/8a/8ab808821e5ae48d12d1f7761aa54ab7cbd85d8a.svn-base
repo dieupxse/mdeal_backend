@@ -1,0 +1,542 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package vn.ctnet.dao;
+
+import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import vn.ctnet.entity.Service;
+
+/**
+ *
+ * @author jacob
+ */
+public class ServiceDAO {
+
+    SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    /**
+     * Insert new user
+     *
+     * @param sv
+     * @return
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     */
+    public boolean insert(Service sv) throws ClassNotFoundException, SQLException {
+        Database DB = new Database();
+        Connection conn = DB.connection();
+        String sql = "INSERT INTO SERVICE("
+                + "PackageID,"
+                + "RegDate,"
+                + "StartDate,"
+                + "ExpDate,"
+                + "Channel,"
+                + "IsSynched,"
+                + "RegisterChannel,"
+                + "Status,"
+                + "AutoAdjourn,"
+                + "Retry,"
+                + "AdjournDate,"
+                + "RemainMoney,"
+                + "RemainAdjournDate,"
+                + "Description,"
+                + "ModifiedDate,"
+                + "isPaid,Phone,isPushMsg) "
+                + "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        PreparedStatement pstm = conn.prepareStatement(sql);
+        pstm.setString(1, (sv.getPackageID() == null ? "D30" : sv.getPackageID()));
+        pstm.setString(2, sv.getRegDate() == null ? fm.format(new Date()) : fm.format(sv.getRegDate()));
+        pstm.setString(3, sv.getStartDate() == null ? fm.format(new Date()) : fm.format(sv.getStartDate()));
+        pstm.setString(4, sv.getExpDate() == null ? fm.format(new Date()) : fm.format(sv.getExpDate()));
+        pstm.setString(5, (sv.getChannel() == null ? "SMS" : sv.getChannel()));
+        pstm.setBoolean(6, (sv.getIsSynched() == null ? false : sv.getIsSynched()));
+        pstm.setString(7, (sv.getRegisterChannel() == null ? "SMS" : sv.getRegisterChannel()));
+        pstm.setString(8, (sv.getStatus() == null ? "0" : sv.getStatus()));
+        pstm.setBoolean(9, (sv.getAutoAdjourn() == null ? false : sv.getAutoAdjourn()));
+        pstm.setInt(10, (sv.getRetry() == null ? 0 : sv.getRetry()));
+        pstm.setString(11, sv.getAdjournDate() == null ? fm.format(new Date()) : fm.format(sv.getAdjournDate()));
+        pstm.setDouble(12, (sv.getRemainMoney() == null ? 0 : sv.getRemainMoney()));
+        pstm.setInt(13, (sv.getRemainAdjournDate() == null ? 0 : sv.getRemainAdjournDate()));
+        pstm.setString(14, (sv.getDescription() == null ? "" : sv.getDescription()));
+        pstm.setString(15, sv.getModifiedDate() == null ? fm.format(new Date()) : fm.format(sv.getModifiedDate()));
+        pstm.setInt(16, (sv.getIsPaid() == null ? 0 : sv.getIsPaid()));
+        pstm.setString(17, (sv.getPhone() == null ? "" : sv.getPhone()));
+        pstm.setInt(18, (sv.getIsPushMsg() == null ? 0 : sv.getIsPushMsg()));
+        try {
+            return (pstm.executeUpdate() > 0);
+        } catch (SQLException e) {
+            return false;
+        } finally {
+            if (conn != null) {
+                conn.close();
+            }
+            if (pstm != null) {
+                pstm.close();
+            }
+        }
+    }
+
+    /**
+     * Update user
+     *
+     * @param sv
+     * @return
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     */
+    public boolean update(Service sv) throws ClassNotFoundException, SQLException {
+        Database DB = new Database();
+        Connection conn = DB.connection();
+        String sql = "UPDATE SERVICE SET "
+                + "PackageID=?,"
+                + "RegDate=?,"
+                + "StartDate=?,"
+                + "ExpDate=?,"
+                + "Channel=?,"
+                + "IsSynched=?,"
+                + "RegisterChannel=?,"
+                + "Status=?,"
+                + "AutoAdjourn=?,"
+                + "Retry=?,"
+                + "AdjournDate=?,"
+                + "RemainMoney=?,"
+                + "RemainAdjournDate=?,"
+                + "Description=?,"
+                + "ModifiedDate=?,"
+                + "isPaid=?,"
+                + "Phone=? ,"
+                + "isPushMsg=? "
+                + "WHERE ServiceID = ?";
+        PreparedStatement pstm = conn.prepareStatement(sql);
+        pstm.setString(1, sv.getPackageID());
+        pstm.setString(2, sv.getRegDate() == null ? fm.format(new Date()) : fm.format(sv.getRegDate()));
+        pstm.setString(3, sv.getStartDate() == null ? fm.format(new Date()) : fm.format(sv.getStartDate()));
+        pstm.setString(4, sv.getExpDate() == null ? fm.format(new Date()) : fm.format(sv.getExpDate()));
+        pstm.setString(5, sv.getChannel());
+        pstm.setBoolean(6, sv.getIsSynched());
+        pstm.setString(7, sv.getRegisterChannel());
+        pstm.setString(8, sv.getStatus());
+        pstm.setBoolean(9, sv.getAutoAdjourn());
+        pstm.setInt(10, sv.getRetry());
+        pstm.setString(11, sv.getAdjournDate() == null ? fm.format(new Date()) : fm.format(sv.getAdjournDate()));
+        pstm.setDouble(12, sv.getRemainMoney());
+        pstm.setInt(13, sv.getRemainAdjournDate());
+        pstm.setString(14, sv.getDescription());
+        pstm.setString(15, sv.getModifiedDate() == null ? fm.format(new Date()) : fm.format(sv.getModifiedDate()));
+        pstm.setInt(16, sv.getIsPaid());
+        pstm.setString(17, sv.getPhone());
+        pstm.setInt(18, sv.getIsPushMsg() == null ? 0 : sv.getIsPushMsg());
+        pstm.setLong(19, sv.getServiceID());
+        try {
+            return (pstm.executeUpdate() > 0);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return false;
+        } finally {
+            if (conn != null) {
+                conn.close();
+            }
+            if (pstm != null) {
+                pstm.close();
+            }
+        }
+    }
+
+    /**
+     * Get All User
+     *
+     * @return
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     */
+    public ArrayList<Service> getAllService() throws ClassNotFoundException, SQLException {
+        ArrayList<Service> list = null;
+        Database DB = new Database();
+        Connection conn = DB.connection();
+        String sql = "SELECT * FROM SERVICE";
+        PreparedStatement pstm = conn.prepareStatement(sql);
+        ResultSet rs = pstm.executeQuery();
+        if (rs != null) {
+            list = new ArrayList<>();
+            while (rs.next()) {
+                Service sv = new Service();
+                sv.setServiceID(rs.getLong("ServiceID"));
+                sv.setPackageID(rs.getString("PackageID"));
+                sv.setRegDate(rs.getTimestamp("RegDate"));
+                sv.setStartDate(rs.getTimestamp("StartDate"));
+                sv.setExpDate(rs.getTimestamp("ExpDate"));
+                sv.setAdjournDate(rs.getTimestamp("AdjournDate"));
+                sv.setAutoAdjourn(rs.getBoolean("AutoAdjourn"));
+                sv.setChannel(rs.getString("Channel"));
+                sv.setStatus(rs.getString("Status"));
+                sv.setDescription(rs.getString("Description"));
+                sv.setIsPaid(rs.getInt("isPaid"));
+                sv.setIsSynched(rs.getBoolean("IsSynched"));
+                sv.setModifiedDate(rs.getDate("ModifiedDate"));
+                sv.setPhone(rs.getString("Phone"));
+                sv.setRegisterChannel(rs.getString("RegisterChannel"));
+                sv.setRemainAdjournDate(rs.getInt("RemainAdjournDate"));
+                sv.setRemainMoney(rs.getDouble("RemainMoney"));
+                sv.setRetry(rs.getInt("Retry"));
+                sv.setSmsmoID(BigInteger.valueOf(rs.getLong("Sms_mo_ID")));
+                sv.setIsPushMsg(rs.getInt("isPushMsg"));
+                list.add(sv);
+            }
+        }
+
+        if (rs != null) {
+            rs.close();
+        }
+        if (pstm != null) {
+            pstm.close();
+        }
+        if (conn != null) {
+            conn.close();
+        }
+        return list;
+    }
+
+    public ArrayList<Service> getDebitService() throws ClassNotFoundException, SQLException {
+        ArrayList<Service> list = null;
+        Database DB = new Database();
+        Connection conn = DB.connection();
+        String sql = "SELECT * FROM SERVICE WHERE (Status = '3' OR Status='1') AND isPaid = 0";
+        PreparedStatement pstm = conn.prepareStatement(sql);
+        ResultSet rs = pstm.executeQuery();
+        if (rs != null) {
+            list = new ArrayList<>();
+            while (rs.next()) {
+                Service sv = new Service();
+                sv.setServiceID(rs.getLong("ServiceID"));
+                sv.setPackageID(rs.getString("PackageID"));
+                sv.setRegDate(rs.getTimestamp("RegDate"));
+                sv.setStartDate(rs.getTimestamp("StartDate"));
+                sv.setExpDate(rs.getTimestamp("ExpDate"));
+                sv.setAdjournDate(rs.getTimestamp("AdjournDate"));
+                sv.setAutoAdjourn(rs.getBoolean("AutoAdjourn"));
+                sv.setChannel(rs.getString("Channel"));
+                sv.setStatus(rs.getString("Status"));
+                sv.setDescription(rs.getString("Description"));
+                sv.setIsPaid(rs.getInt("isPaid"));
+                sv.setIsSynched(rs.getBoolean("IsSynched"));
+                sv.setModifiedDate(rs.getDate("ModifiedDate"));
+                sv.setPhone(rs.getString("Phone"));
+                sv.setRegisterChannel(rs.getString("RegisterChannel"));
+                sv.setRemainAdjournDate(rs.getInt("RemainAdjournDate"));
+                sv.setRemainMoney(rs.getDouble("RemainMoney"));
+                sv.setRetry(rs.getInt("Retry"));
+                sv.setSmsmoID(BigInteger.valueOf(rs.getLong("Sms_mo_ID")));
+                sv.setIsPushMsg(rs.getInt("isPushMsg"));
+                list.add(sv);
+            }
+        }
+
+        if (rs != null) {
+            rs.close();
+        }
+        if (pstm != null) {
+            pstm.close();
+        }
+        if (conn != null) {
+            conn.close();
+        }
+        return list;
+    }
+
+    public ArrayList<Service> getExpAccount() throws ClassNotFoundException, SQLException {
+        ArrayList<Service> list = null;
+        Database DB = new Database();
+        Connection conn = DB.connection();
+        String sql = "SELECT * FROM SERVICE WHERE ExpDate < GETDATE() and isPaid=1 and Status <> '0'";
+        PreparedStatement pstm = conn.prepareStatement(sql);
+        ResultSet rs = pstm.executeQuery();
+        if (rs != null) {
+            list = new ArrayList<>();
+            while (rs.next()) {
+                Service sv = new Service();
+                sv.setServiceID(rs.getLong("ServiceID"));
+                sv.setPackageID(rs.getString("PackageID"));
+                sv.setRegDate(rs.getTimestamp("RegDate"));
+                sv.setStartDate(rs.getTimestamp("StartDate"));
+                sv.setExpDate(rs.getTimestamp("ExpDate"));
+                sv.setAdjournDate(rs.getTimestamp("AdjournDate"));
+                sv.setAutoAdjourn(rs.getBoolean("AutoAdjourn"));
+                sv.setChannel(rs.getString("Channel"));
+                sv.setStatus(rs.getString("Status"));
+                sv.setDescription(rs.getString("Description"));
+                sv.setIsPaid(rs.getInt("isPaid"));
+                sv.setIsSynched(rs.getBoolean("IsSynched"));
+                sv.setModifiedDate(rs.getDate("ModifiedDate"));
+                sv.setPhone(rs.getString("Phone"));
+                sv.setRegisterChannel(rs.getString("RegisterChannel"));
+                sv.setRemainAdjournDate(rs.getInt("RemainAdjournDate"));
+                sv.setRemainMoney(rs.getDouble("RemainMoney"));
+                sv.setRetry(rs.getInt("Retry"));
+                sv.setSmsmoID(BigInteger.valueOf(rs.getLong("Sms_mo_ID")));
+                sv.setIsPushMsg(rs.getInt("isPushMsg"));
+                list.add(sv);
+            }
+        }
+
+        if (rs != null) {
+            rs.close();
+        }
+        if (pstm != null) {
+            pstm.close();
+        }
+        if (conn != null) {
+            conn.close();
+        }
+        return list;
+    }
+
+    public ArrayList<Service> getExpWarning() throws ClassNotFoundException, SQLException {
+        ArrayList<Service> list = null;
+        Database DB = new Database();
+        Connection conn = DB.connection();
+        String sql = "SELECT * FROM SERVICE WHERE Status = '1' and isPaid=1 and (isPushMsg is null or isPushMsg = 0) and DATEADD(DAY,2,GETDATE()) >= ExpDate";
+        PreparedStatement pstm = conn.prepareStatement(sql);
+        ResultSet rs = pstm.executeQuery();
+        if (rs != null) {
+            list = new ArrayList<>();
+            while (rs.next()) {
+                Service sv = new Service();
+                sv.setServiceID(rs.getLong("ServiceID"));
+                sv.setPackageID(rs.getString("PackageID"));
+                sv.setRegDate(rs.getTimestamp("RegDate"));
+                sv.setStartDate(rs.getTimestamp("StartDate"));
+                sv.setExpDate(rs.getTimestamp("ExpDate"));
+                sv.setAdjournDate(rs.getTimestamp("AdjournDate"));
+                sv.setAutoAdjourn(rs.getBoolean("AutoAdjourn"));
+                sv.setChannel(rs.getString("Channel"));
+                sv.setStatus(rs.getString("Status"));
+                sv.setDescription(rs.getString("Description"));
+                sv.setIsPaid(rs.getInt("isPaid"));
+                sv.setIsSynched(rs.getBoolean("IsSynched"));
+                sv.setModifiedDate(rs.getDate("ModifiedDate"));
+                sv.setPhone(rs.getString("Phone"));
+                sv.setRegisterChannel(rs.getString("RegisterChannel"));
+                sv.setRemainAdjournDate(rs.getInt("RemainAdjournDate"));
+                sv.setRemainMoney(rs.getDouble("RemainMoney"));
+                sv.setRetry(rs.getInt("Retry"));
+                sv.setSmsmoID(BigInteger.valueOf(rs.getLong("Sms_mo_ID")));
+                sv.setIsPushMsg(rs.getInt("isPushMsg"));
+                list.add(sv);
+            }
+        }
+
+        if (rs != null) {
+            rs.close();
+        }
+        if (pstm != null) {
+            pstm.close();
+        }
+        if (conn != null) {
+            conn.close();
+        }
+        return list;
+    }
+
+    public ArrayList<Service> getRenewAccount() throws ClassNotFoundException, SQLException {
+        ArrayList<Service> list = null;
+        Database DB = new Database();
+        Connection conn = DB.connection();
+        String sql = "SELECT * FROM SERVICE WHERE  isPaid=0 and Status ='2'";
+        PreparedStatement pstm = conn.prepareStatement(sql);
+        ResultSet rs = pstm.executeQuery();
+        if (rs != null) {
+            list = new ArrayList<>();
+            while (rs.next()) {
+                Service sv = new Service();
+                sv.setServiceID(rs.getLong("ServiceID"));
+                sv.setPackageID(rs.getString("PackageID"));
+                sv.setRegDate(rs.getTimestamp("RegDate"));
+                sv.setStartDate(rs.getTimestamp("StartDate"));
+                sv.setExpDate(rs.getTimestamp("ExpDate"));
+                sv.setAdjournDate(rs.getTimestamp("AdjournDate"));
+                sv.setAutoAdjourn(rs.getBoolean("AutoAdjourn"));
+                sv.setChannel(rs.getString("Channel"));
+                sv.setStatus(rs.getString("Status"));
+                sv.setDescription(rs.getString("Description"));
+                sv.setIsPaid(rs.getInt("isPaid"));
+                sv.setIsSynched(rs.getBoolean("IsSynched"));
+                sv.setModifiedDate(rs.getDate("ModifiedDate"));
+                sv.setPhone(rs.getString("Phone"));
+                sv.setRegisterChannel(rs.getString("RegisterChannel"));
+                sv.setRemainAdjournDate(rs.getInt("RemainAdjournDate"));
+                sv.setRemainMoney(rs.getDouble("RemainMoney"));
+                sv.setRetry(rs.getInt("Retry"));
+                sv.setSmsmoID(BigInteger.valueOf(rs.getLong("Sms_mo_ID")));
+                sv.setIsPushMsg(rs.getInt("isPushMsg"));
+                list.add(sv);
+            }
+        }
+
+        if (rs != null) {
+            rs.close();
+        }
+        if (pstm != null) {
+            pstm.close();
+        }
+        if (conn != null) {
+            conn.close();
+        }
+        return list;
+    }
+
+    public ArrayList<Service> getReTryAccount() throws ClassNotFoundException, SQLException {
+        ArrayList<Service> list = null;
+        Database DB = new Database();
+        Connection conn = DB.connection();
+        String sql = "SELECT * FROM SERVICE WHERE Status = '0' and isPaid = 2 and AdjournDate <= GETDATE() and RemainMoney > 0";
+        PreparedStatement pstm = conn.prepareStatement(sql);
+        ResultSet rs = pstm.executeQuery();
+        if (rs != null) {
+            list = new ArrayList<>();
+            while (rs.next()) {
+                Service sv = new Service();
+                sv.setServiceID(rs.getLong("ServiceID"));
+                sv.setPackageID(rs.getString("PackageID"));
+                sv.setRegDate(rs.getTimestamp("RegDate"));
+                sv.setStartDate(rs.getTimestamp("StartDate"));
+                sv.setExpDate(rs.getTimestamp("ExpDate"));
+                sv.setAdjournDate(rs.getTimestamp("AdjournDate"));
+                sv.setAutoAdjourn(rs.getBoolean("AutoAdjourn"));
+                sv.setChannel(rs.getString("Channel"));
+                sv.setStatus(rs.getString("Status"));
+                sv.setDescription(rs.getString("Description"));
+                sv.setIsPaid(rs.getInt("isPaid"));
+                sv.setIsSynched(rs.getBoolean("IsSynched"));
+                sv.setModifiedDate(rs.getDate("ModifiedDate"));
+                sv.setPhone(rs.getString("Phone"));
+                sv.setRegisterChannel(rs.getString("RegisterChannel"));
+                sv.setRemainAdjournDate(rs.getInt("RemainAdjournDate"));
+                sv.setRemainMoney(rs.getDouble("RemainMoney"));
+                sv.setRetry(rs.getInt("Retry"));
+                sv.setSmsmoID(BigInteger.valueOf(rs.getLong("Sms_mo_ID")));
+                sv.setIsPushMsg(rs.getInt("isPushMsg"));
+                list.add(sv);
+            }
+        }
+
+        if (rs != null) {
+            rs.close();
+        }
+        if (pstm != null) {
+            pstm.close();
+        }
+        if (conn != null) {
+            conn.close();
+        }
+        return list;
+    }
+
+    public ArrayList<Service> getExpWarningD1() throws ClassNotFoundException, SQLException {
+        ArrayList<Service> list = null;
+        Database DB = new Database();
+        Connection conn = DB.connection();
+        String sql = "SELECT * FROM SERVICE WHERE Status ='2' and PackageID = 'D1' and isPaid=1 and isPushMsg = 15";
+        PreparedStatement pstm = conn.prepareStatement(sql);
+        ResultSet rs = pstm.executeQuery();
+        if (rs != null) {
+            list = new ArrayList<>();
+            while (rs.next()) {
+                Service sv = new Service();
+                sv.setServiceID(rs.getLong("ServiceID"));
+                sv.setPackageID(rs.getString("PackageID"));
+                sv.setRegDate(rs.getTimestamp("RegDate"));
+                sv.setStartDate(rs.getTimestamp("StartDate"));
+                sv.setExpDate(rs.getTimestamp("ExpDate"));
+                sv.setAdjournDate(rs.getTimestamp("AdjournDate"));
+                sv.setAutoAdjourn(rs.getBoolean("AutoAdjourn"));
+                sv.setChannel(rs.getString("Channel"));
+                sv.setStatus(rs.getString("Status"));
+                sv.setDescription(rs.getString("Description"));
+                sv.setIsPaid(rs.getInt("isPaid"));
+                sv.setIsSynched(rs.getBoolean("IsSynched"));
+                sv.setModifiedDate(rs.getDate("ModifiedDate"));
+                sv.setPhone(rs.getString("Phone"));
+                sv.setRegisterChannel(rs.getString("RegisterChannel"));
+                sv.setRemainAdjournDate(rs.getInt("RemainAdjournDate"));
+                sv.setRemainMoney(rs.getDouble("RemainMoney"));
+                sv.setRetry(rs.getInt("Retry"));
+                sv.setSmsmoID(BigInteger.valueOf(rs.getLong("Sms_mo_ID")));
+                sv.setIsPushMsg(rs.getInt("isPushMsg"));
+                list.add(sv);
+            }
+        }
+
+        if (rs != null) {
+            rs.close();
+        }
+        if (pstm != null) {
+            pstm.close();
+        }
+        if (conn != null) {
+            conn.close();
+        }
+        return list;
+    }
+
+    /**
+     * Get user
+     *
+     * @param phone
+     * @return
+     * @throws java.lang.ClassNotFoundException
+     * @throws java.sql.SQLException
+     */
+    public Service getServiceByPhone(String phone) throws ClassNotFoundException, SQLException {
+
+        Database DB = new Database();
+        Connection conn = DB.connection();
+
+        String sql = "SELECT * FROM SERVICE WHERE Phone = ?";
+        try {
+            PreparedStatement pstm = conn.prepareStatement(sql);
+            pstm.setString(1, phone);
+            ResultSet rs = pstm.executeQuery();
+            if (rs != null) {
+                Service sv = new Service();
+                while (rs.next()) {
+                    sv.setServiceID((rs.getLong("ServiceID") == 0 ? 0 : rs.getLong("ServiceID")));
+                    sv.setPackageID(rs.getString("PackageID"));
+                    sv.setRegDate(rs.getTimestamp("RegDate"));
+                    sv.setStartDate(rs.getTimestamp("StartDate"));
+                    sv.setExpDate(rs.getTimestamp("ExpDate"));
+                    sv.setAdjournDate(rs.getTimestamp("AdjournDate"));
+                    sv.setAutoAdjourn(rs.getBoolean("AutoAdjourn"));
+                    sv.setChannel(rs.getString("Channel"));
+                    sv.setStatus(rs.getString("Status"));
+                    sv.setDescription(rs.getString("Description"));
+                    sv.setIsPaid(rs.getInt("isPaid"));
+                    sv.setIsSynched(rs.getBoolean("IsSynched"));
+                    sv.setModifiedDate(rs.getDate("ModifiedDate"));
+                    sv.setPhone(rs.getString("Phone"));
+                    sv.setRegisterChannel(rs.getString("RegisterChannel"));
+                    sv.setRemainAdjournDate(rs.getInt("RemainAdjournDate"));
+                    sv.setRemainMoney(rs.getDouble("RemainMoney"));
+                    sv.setRetry(rs.getInt("Retry"));
+                    sv.setSmsmoID(BigInteger.valueOf(rs.getLong("Sms_mo_ID")));
+                    sv.setIsPushMsg(rs.getInt("isPushMsg"));
+                }
+                conn.close();
+                pstm.close();
+                rs.close();
+                return sv;
+            }
+        } catch (Exception e) {
+            return null;
+        }
+        return null;
+    }
+}

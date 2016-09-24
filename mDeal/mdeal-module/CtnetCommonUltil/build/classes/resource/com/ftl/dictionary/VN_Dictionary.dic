@@ -1,0 +1,77 @@
+HardGreaterOrEquals==lá»›n hÆ¡n hoáº·c báº±ng
+HardGreaterThan==lá»›n hÆ¡n
+HardSmallerOrEquals==nhá»� hÆ¡n hoáº·c báº±ng
+HardSmallerThan==nhá»� hÆ¡n
+HardEquals==báº±ng
+HardNotEquals==khÃ¡c
+GreaterOrEquals==lá»›n hÆ¡n hoáº·c báº±ng
+GreaterThan==lá»›n hÆ¡n
+SmallerOrEquals==nhá»� hÆ¡n hoáº·c báº±ng
+SmallerThan==nhá»� hÆ¡n
+Equals==báº±ng
+NotEquals==khÃ¡c
+CurrentDate==ngÃ y hiá»‡n táº¡i
+All==Táº¥t cáº£
+Add==ThÃªm
+AddCopy==Sao chÃ©p
+Modify==Sá»­a
+Remove==XoÃ¡
+Search==TÃ¬m kiáº¿m
+Print==In
+OK==Cháº¥p nháº­n
+Cancel==Bá»� qua
+Yes==CÃ³
+No==KhÃ´ng
+Exit==ThoÃ¡t
+ExpandableTextTitle==Nhap noi dung
+Back==< Quay láº¡i
+Next==Tiáº¿p tá»¥c >
+Finish==Thá»±c hiá»‡n
+Mnemonic
+	Add==m
+	AddCopy==c
+	Modify==s
+	Remove==x
+	Search==k
+	Print==i
+	OK==c
+	Cancel==b
+	Yes==c
+	No==k
+	Exit==t
+	Back==Q
+	Next==T
+	Finish==H
+Confirm
+	SaveOnExit==Dá»¯ liá»‡u chÆ°a Ä‘Æ°á»£c ghi vÃ o database.\nBáº¡n cÃ³ muá»‘n ghi trÆ°á»›c khi thoÃ¡t khÃ´ng?
+	Cancel==Dá»¯ liá»‡u Ä‘ang nháº­p sáº½ máº¥t náº¿u báº¡n khÃ´ng hoÃ n táº¥t quÃ¡ trÃ¬nh. Báº¡n cÃ³ thá»±c sá»± muá»‘n bá»� qua khÃ´ng?
+	Exit==Báº¡n thá»±c sá»± muá»‘n thoÃ¡t khá»�i há»‡ thá»‘ng?
+Message
+	DataIsNotChanged==KhÃ´ng thá»ƒ thá»±c hiá»‡n viá»‡c cáº­p nháº­t do báº¡n chÆ°a nháº­p dá»¯ liá»‡u má»›i.
+	EmptySearchResult==KhÃ´ng tÃ¬m tháº¥y báº£n ghi nÃ o trong CSDL.
+	FullSearchResult==QuÃ¡ nhiá»�u báº£n ghi Ä‘Æ°á»£c tÃ¬m tháº¥y, chÃºng tÃ´i chá»‰ hiá»ƒn thá»‹ ngáº«u nhiÃªn <%p> báº£n ghi.\nBáº¡n cáº§n bÃ³ háº¹p Ä‘iá»�u kiá»‡n tÃ¬m kiáº¿m Ä‘á»ƒ tÃ¬m Ä‘Æ°á»£c káº¿t quáº£ chÃ­nh xÃ¡c hÆ¡n.
+PanelControlButton
+	AddWarning==Báº¡n cÃ³ thá»±c sá»± muá»‘n thÃªm má»›i báº£n ghi nÃ y vÃ o database khÃ´ng?
+	AddCopyWarning==Báº¡n cÃ³ thá»±c sá»± muá»‘n thÃªm má»›i báº£n ghi giá»‘ng báº£n ghi nÃ y vÃ o database khÃ´ng?
+	ModifyWarning==Báº¡n cÃ³ thá»±c sá»± muá»‘n sá»­a báº£n ghi nÃ y khÃ´ng?
+	RemoveWarning==Báº¡n cÃ³ thá»±c sá»± muá»‘n xÃ³a báº£n ghi nÃ y khÃ´ng?
+	SearchWarning==TÃ¬m kiáº¿m vá»›i nhá»¯ng Ä‘iá»�u kiá»‡n nÃ y?
+	PrintWarning==In nhá»¯ng báº£n ghi nÃ y?
+VectorTable
+	Copy==Copy
+	ShowAll==Hiá»‡n toÃ n bá»™
+	Insert==ThÃªm dÃ²ng
+	Delete==XÃ³a dÃ²ng
+	Show==Hiá»‡n cá»™t
+	Hide==áº¨n cá»™t
+	Filter==Lá»�c
+	Export==Káº¿t xuáº¥t
+	FilterTitle==Dieu kien loc
+	ExportTitle==Ket xuat du lieu
+	FileRequiredWarning==Báº¡n pháº£i chá»�n má»™t file Ä‘á»ƒ lÆ°u dá»¯ liá»‡u.
+	FileName==TÃªn file
+	ExportType==Loáº¡i file
+	Separator==NgÄƒn cÃ¡ch
+JTableContainer
+	ShowStatus==Hiá»‡n thanh tráº¡ng thÃ¡i
+	HideStatus==áº¨n thanh tráº¡ng thÃ¡i

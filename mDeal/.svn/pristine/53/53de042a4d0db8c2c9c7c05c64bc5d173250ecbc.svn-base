@@ -1,0 +1,150 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package vn.ctnet.process;
+
+import vn.ctnet.entity.*;
+import charging.*;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import vn.ctnet.Ultils.*;
+import vn.ctnet.dao.CdrDAO;
+import vn.ctnet.dao.PackageDAO;
+import vn.ctnet.dao.ServiceDAO;
+import vn.ctnet.dao.SmsMtDAO;
+/*
+ *
+ * @author jacob
+ */
+
+public class RenewService extends Thread {
+
+    @Override
+    public void run() {
+        ServiceDAO svDAO = new ServiceDAO();
+        PackageDAO pkDAO = new PackageDAO();
+        SmsMtDAO smsDAO = new SmsMtDAO();
+        CdrDAO cdrDAO = new CdrDAO();
+        Charging dia = new Charging();
+        Ultils ult = new Ultils();
+        while (true) {
+            int timeout = Integer.parseInt(vn.ctnet.confi.Ultility.getValue("thread_renew"));
+            try {
+                ArrayList<Service> lsv = svDAO.getRenewAccount();
+
+                if (lsv.size() > 0) {
+                    for (Service sv : lsv) {
+                        System.out.println("Gia han goi " + sv.getPackageID() + " thue bao " + sv.getPhone());
+                        vn.ctnet.entity.Package pkg = pkDAO.getPackageByID(sv.getPackageID());
+                        if (pkg != null) {
+                            //String rsdb = dia.debit(ult.initPhoneNumber(sv.getPhone(), 2), (long) pkg.getPrice(), pkg.getPackageID(), ult.initPhoneNumber(sv.getPhone(), 2), "001", "001", 272);//CPS-0000
+                            String rsdb = dia.debit(ult.initPhoneNumber(sv.getPhone(), 2), (long) pkg.getPrice(), "049193", ult.initPhoneNumber(sv.getPhone(), 2), Ultils.getCategoryId(sv.getPackageID(), 10), Ultils.getCategoryId(sv.getPackageID(), 6), 272);
+                            Cdr cdr = new Cdr();
+                            cdr.setChannelType(sv.getChannel());
+                            cdr.setContentID(Ultils.getCategoryId(sv.getPackageID(), 10));
+                            cdr.setCost(pkg.getPrice());
+                            cdr.setCpid("001");
+                            cdr.setDebitTime(new Date());
+                            cdr.setEventID(Ultils.getCategoryId(sv.getPackageID(), 6));
+                            cdr.setInformation("mDealCharging");
+                            cdr.setIsPushed(false);
+                            cdr.setMsisdn(sv.getPhone());
+                            cdr.setShortCode("049193");
+                            cdr.setStatus(1);
+                            //gia han thanh cong
+                            if (rsdb.equals("CPS-0000")) {
+                                //insert CDR tinh cuoc
+                                cdr.setStatus(1);
+                                sv.setStartDate(new Timestamp(new Date().getTime()));
+                                sv.setExpDate(ult.adddays(pkg.getNumOfDate()));
+                                sv.setIsPaid(1);
+                                sv.setModifiedDate(new Date());
+                                sv.setRemainMoney(Double.valueOf("0"));
+                                sv.setRetry(0);
+                                sv.setStatus("2");
+                                if (sv.getPackageID().equals("D1")) {
+                                    if (sv.getIsPushMsg() == null || sv.getIsPushMsg() == 0) {
+                                        sv.setIsPushMsg(1);
+                                    } else {
+                                        sv.setIsPushMsg((sv.getIsPushMsg() + 1));
+                                    }
+                                }
+                                //gia han thanh cong
+                                String msg = vn.ctnet.confi.Ultility.getSms("msg_gh_ok");
+                                msg = msg.replace("{GOI}", sv.getPackageID());
+                                msg = msg.replace("{NGAY}", pkg.getNumOfDate() + "");
+                                msg = msg.replace("{GIA}", ((int) pkg.getPrice()) + "");
+                                SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                                msg = msg.replace("{DATE}", fm.format(sv.getExpDate()));
+                                
+                                if (!sv.getPackageID().equals("D1")) {
+                                    SendSMS sendSMS = new SendSMS(sv.getPhone(),"mDeal",msg);
+                                    sendSMS.start();
+                                }
+                                
+                                System.out.println("Thuc hien tru tien thue bao " + sv.getPhone() + " thanh cong");
+                            } 
+                            //Thue bao khong kha dung
+                            else if(rsdb.equals("CPS-1004") || rsdb.equals("CPS-1007") || rsdb.startsWith("CPE")) 
+                            {
+                                cdr.setStatus(0);
+                                sv.setIsPaid(0);
+                                sv.setRetry(0);
+                                sv.setAdjournDate(new Timestamp(new Date().getTime()));
+                                sv.setStatus("0");
+                                sv.setModifiedDate(new Date());
+                            }
+                            else {
+                                //insert CDR tinh cuoc
+                                cdr.setStatus(0);
+                                sv.setIsPaid(2);
+                                sv.setRetry(60);
+                                sv.setStatus("0");
+                                sv.setRemainMoney(pkg.getPrice());
+                                sv.setAdjournDate(ult.addHour(12));
+                                sv.setModifiedDate(new Date());
+                                
+                                
+                                //gia han khong thanh cong
+                                String msg = vn.ctnet.confi.Ultility.getSms("msg_gh_lock");
+                                msg = msg.replace("{GOI}", sv.getPackageID());
+                                msg = msg.replace("{NGAY}", pkg.getNumOfDate() + "");
+                                msg = msg.replace("{GIA}", ((int) pkg.getPrice()) + "");
+                                SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                                msg = msg.replace("{DATE}", fm.format(sv.getExpDate()));
+                                
+                                SendSMS sendSMS = new SendSMS(sv.getPhone(),"9193",msg);
+                                sendSMS.start();
+                                svDAO.update(sv);
+                                System.out.println("Thuc hien tru tien thue bao " + sv.getPhone() + " khong thanh cong");
+                            }
+                            cdrDAO.insert(cdr);
+
+                        }
+                        svDAO.update(sv);
+                    }
+
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+
+            }
+            try {
+                Thread.sleep(timeout*1000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(RenewService.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+    }
+   
+
+}

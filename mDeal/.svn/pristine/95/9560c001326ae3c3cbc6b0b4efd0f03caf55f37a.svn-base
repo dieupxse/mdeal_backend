@@ -1,0 +1,63 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package vn.ctnet.mdeal.config;
+
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
+/**
+ *
+ * @author vanvtse90186
+ */
+public class Utils {
+
+    public static String getMD5(String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] messageDigest = md.digest(input.getBytes());
+            BigInteger number = new BigInteger(1, messageDigest);
+            String hashtext = number.toString(16);
+            // Now we need to zero pad it if you actually want the full 32 chars.
+            while (hashtext.length() < 32) {
+                hashtext = "0" + hashtext;
+            }
+            return hashtext.toUpperCase();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Date adddays(int day) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        Calendar c = Calendar.getInstance();
+        c.setTime(new Date()); // Now use today date.
+        c.add(Calendar.DATE, day); // Adding 5 days        
+        return c.getTime();
+
+    }
+
+    public static int countmessage(int message) {
+        int result = 0;
+        if (message <= 160) {
+            result = 1;
+        }
+        if ((message > 160) && (message <= 306)) {
+            result = 2;
+        }
+        if ((message > 306) && (message <= 459)) {
+            result = 3;
+        }
+        if ((message > 459) && (message <= 612)) {
+            result = 4;
+        }
+        return result;
+    }
+
+}

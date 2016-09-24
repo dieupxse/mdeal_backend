@@ -1,0 +1,33 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package org.jsmpp.ctnet;
+
+import vn.ctnet.mdeal.bo.SMSReciever;
+
+/**
+ *
+ * @author vanvtse90186
+ */
+public class ThreatReceiverSMS extends Thread {
+
+    String message;
+    String msisdn;
+    String brandName;
+
+    ThreatReceiverSMS(String message, String msisdn, String brandName) {
+       this.message = message;
+        this.msisdn = msisdn;
+        this.brandName = brandName;
+        System.out.println("Nhan tin nhan tu: "+msisdn+ " - Msg: "+message);
+    }
+
+
+    @Override
+    public void run() {
+        SMSReciever smsReci = new SMSReciever();
+        smsReci.recieverSMS(message, msisdn, brandName);
+    }
+}

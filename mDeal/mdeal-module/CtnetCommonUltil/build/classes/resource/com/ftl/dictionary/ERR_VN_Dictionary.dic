@@ -1,0 +1,48 @@
+{FileNotFoundException}==KhÃ´ng tÃ¬m tháº¥y file: <%p>
+{ClassNotFoundException}==KhÃ´ng tÃ¬m tháº¥y lá»›p: <%p>
+{NoSuchMethodException}==KhÃ´ng tÃ¬m tháº¥y hÃ m: <%p>
+{Unspecified}==Lá»—i khÃ´ng xÃ¡c Ä‘á»‹nh
+FTL-00001==Báº¡n pháº£i nháº­p Ã­t nháº¥t má»™t Ä‘iá»�u kiá»‡n Ä‘á»ƒ tÃ¬m kiáº¿m
+FTL-00002==TrÆ°á»�ng <%p> báº¯t buá»™c pháº£i nháº­p liá»‡u
+FTL-00003==GiÃ¡ trá»‹ <%p> pháº£i lá»›n hÆ¡n hoáº·c báº±ng giÃ¡ trá»‹ <%p>
+FTL-00004==GiÃ¡ trá»‹ <%p> khÃ´ng há»£p lá»‡, hÃ£y kiá»ƒm tra láº¡i
+FTL-00005==KhÃ´ng thá»ƒ thay Ä‘á»•i dá»¯ liá»‡u máº·c Ä‘á»‹nh cá»§a há»‡ thá»‘ng
+FTL-00006==Máº­t kháº©u báº¡n nháº­p khÃ´ng Ä‘Ãºng, hÃ£y kiá»ƒm tra láº¡i
+FTL-00007==Máº­t kháº©u xÃ¡c nháº­n khÃ´ng trÃ¹ng vá»›i máº­t kháº©u má»›i
+FTL-00008==TrÆ°á»�ng <%p> báº¯t buá»™c pháº£i lÃ  kiá»ƒu sá»‘
+FTL-00009==KhÃ´ng tÃ¬m tháº¥y dá»¯ liá»‡u trong báº£ng <%p>
+FTL-00010==Nháº­p trÃ¹ng dá»¯ liá»‡u <%p>
+FTL-00011==Trong CSDL Ä‘Ã£ tá»“n táº¡i má»™t báº£n ghi vá»›i giÃ¡ trá»‹ <%p> = <%p>
+FTL-00012==KhÃ´ng tÃ¬m tháº¥y dá»¯ liá»‡u <%p> trong database
+FTL-00013==Báº¡n khÃ´ng Ä‘Æ°á»£c phÃ©p truy cáº­p táº¡i thá»�i Ä‘iá»ƒm nÃ y
+FTL-00014==Báº¡n khÃ´ng cÃ³ quyá»�n <%p> trÃªn chá»©c nÄƒng <%p>
+FTL-00015==Báº¡n khÃ´ng cÃ³ quyá»�n thá»±c hiá»‡n chá»©c nÄƒng nÃ y táº¡i thá»�i Ä‘iá»ƒm nÃ y
+FTL-00016==NgÆ°á»�i sá»­ dá»¥ng <%p> khÃ´ng tá»“n táº¡i trong há»‡ thá»‘ng hoáº·c Ä‘Ã£ bá»‹ khÃ³a
+FTL-00017==Chá»©c nÄƒng <%p> khÃ´ng tá»“n táº¡i trong há»‡ thá»‘ng
+FTL-00018==Sequence <%p> khÃ´ng tá»“n táº¡i
+FTL-00019==Káº¿t ná»‘i Ä‘Ã£ bá»‹ chiáº¿m háº¿t, báº¡n hÃ£y thá»­ láº¡i sau vÃ i phÃºt ná»¯a
+FTL-00020==Báº¡n pháº£i Ä‘Äƒng nháº­p vÃ o há»‡ thá»‘ng
+FTL-00021==Tiáº¿n trÃ¬nh <%p> khÃ´ng tá»“n táº¡i
+FTL-00022==Ä�á»‹a chá»‰ IP <%p> khÃ´ng Ä‘Æ°á»£c phÃ©p truy cáº­p há»‡ thá»‘ng.
+FTL-00023==GiÃ¡ trá»‹ <%p> pháº£i <%p> giÃ¡ trá»‹ <%p>
+FTL-00024==Sá»‘ phiÃªn giao dá»‹ch ngÆ°á»�i sá»­ dá»¥ng <%p> Ä‘ang sá»­ dá»¥ng Ä‘Ã£ vÆ°á»£t quÃ¡ giá»›i háº¡n cho phÃ©p (<%p>).
+FTL-00025==PhiÃªn giao dá»‹ch Ä‘Ã£ bá»‹ há»§y, báº¡n cáº§n Ä‘Äƒng nháº­p láº¡i Ä‘á»ƒ cÃ³ thá»ƒ tiáº¿p tá»¥c sá»­ dá»¥ng há»‡ thá»‘ng.
+FTL-00026==Báº¡n khÃ´ng cÃ³ quyá»�n <%p> trÃªn dá»¯ liá»‡u <%p> - <%p>
+FTL-10003==Máº­t kháº©u cá»§a báº¡n Ä‘Ã£ quÃ¡ háº¡n, báº¡n cáº§n Ä‘á»•i máº­t kháº©u Ä‘á»ƒ cÃ³ thá»ƒ sá»­ dá»¥ng há»‡ thá»‘ng.
+FTL-10012==Máº­t kháº©u khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng.
+FTL-10013==Máº­t kháº©u cá»§a báº¡n khÃ´ng há»£p lá»‡. Máº­t kháº©u pháº£i cÃ³ Ä‘á»™ dÃ i Ã­t nháº¥t lÃ  <%p> kÃ½ tá»±.
+FTL-10014==Máº­t kháº©u má»›i khÃ´ng Ä‘Æ°á»£c trÃ¹ng vá»›i máº­t kháº©u cÅ©.
+FTL-10015==Chá»©c nÄƒng báº£o máº­t chÆ°a Ä‘Æ°á»£c thiáº¿t láº­p, chá»‰ cÃ³ NSD system Ä‘Æ°á»£c phÃ©p Ä‘Äƒng nháº­p há»‡ thá»‘ng.
+FTL-10016==Biá»ƒu thá»©c <%p> gÃ¢y ra lá»—i <%p>.
+FTL-10017==Biá»ƒu thá»©c <%p> pháº£i lÃ  biá»ƒu thá»©c logic.
+FTL-10018==KhÃ´ng Ä‘Æ°á»£c phÃ©p thÃªm/sá»­a/xÃ³a dá»¯ liá»‡u há»‡ thá»‘ng.
+FTL-10019==Máº­t kháº©u cá»§a báº¡n khÃ´ng há»£p lá»‡. Máº­t kháº©u pháº£i chá»©a Ã­t nháº¥t <%p> kÃ½ tá»± alphabet (A - Z, a - z).
+FTL-10020==Máº­t kháº©u cá»§a báº¡n khÃ´ng há»£p lá»‡. Máº­t kháº©u pháº£i chá»©a Ã­t nháº¥t <%p> kÃ½ tá»± alphabet chá»¯ hoa (A - Z).
+FTL-10021==Máº­t kháº©u cá»§a báº¡n khÃ´ng há»£p lá»‡. Máº­t kháº©u pháº£i chá»©a Ã­t nháº¥t <%p> kÃ½ tá»± alphabet chá»¯ thÆ°á»�ng (a - z).
+FTL-10022==Máº­t kháº©u cá»§a báº¡n khÃ´ng há»£p lá»‡. Máº­t kháº©u pháº£i chá»©a Ã­t nháº¥t <%p> kÃ½ tá»± sá»‘ (0 - 9).
+FTL-10023==TÃ i khoáº£n cá»§a báº¡n Ä‘Ã£ bá»‹ khÃ³a do báº¡n Ä‘Äƒng nháº­p sai quÃ¡ sá»‘ láº§n cho phÃ©p.\nHÃ£y liÃªn há»‡ vá»›i quáº£n trá»‹ há»‡ thá»‘ng Ä‘á»ƒ xá»­ lÃ½.
+ORA-00942==Table hay view cáº§n truy xuáº¥t khÃ´ng tá»“n táº¡i
+ORA-02292==KhÃ´ng xÃ³a Ä‘Æ°á»£c báº£n ghi nÃ y. Dá»¯ liá»‡u liÃªn quan Ä‘ang tá»“n táº¡i
+ORA-00001==Báº£n ghi nÃ y Ä‘Ã£ tá»“n táº¡i trong há»‡ thá»‘ng
+ORA-01407==KhÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng trÆ°á»�ng báº¯t buá»™c pháº£i nháº­p liá»‡u
+FTL-10024==Chá»©c nÄƒng báº£o máº­t Ä‘Ã£ Ä‘Æ°á»£c thiáº¿t láº­p, NSD system khÃ´ng Ä‘Æ°á»£c phÃ©p Ä‘Äƒng nháº­p há»‡ thá»‘ng.

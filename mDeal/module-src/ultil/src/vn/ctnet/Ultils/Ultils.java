@@ -1,0 +1,121 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package vn.ctnet.Ultils;
+
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Timestamp;
+
+import java.util.Calendar;
+import java.util.Date;
+
+/**
+ *
+ * @author jacob
+ */
+public class Ultils {
+
+    public  String initPhoneNumber(String phone, int type) {
+        //using for smpp
+        if (type == 1) {
+            if (phone.startsWith("0")) {
+                return phone.replaceFirst("0", "84");
+            } else if (phone.startsWith("84")) {
+                return phone;
+            } else if (phone.startsWith("+84")) {
+                return phone.replace("+", "");
+            } else {
+                return phone;
+            }
+        } 
+        //using for chargin proxy
+        else {
+            if (phone.startsWith("0")) {
+                return phone.replaceFirst("0", "");
+            } else if(phone.startsWith("84")) {
+                return phone.replaceFirst("84","");
+            } else if(phone.startsWith("+84")) {
+                return phone.replace("+84","");
+            } else return phone;
+        }
+    }
+    
+    public  String MD5(String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] messageDigest = md.digest(input.getBytes());
+            BigInteger number = new BigInteger(1, messageDigest);
+            String hashtext = number.toString(16);
+            // Now we need to zero pad it if you actually want the full 32 chars.
+            while (hashtext.length() < 32) {
+                hashtext = "0" + hashtext;
+            }
+            return hashtext.toUpperCase();
+        }
+        catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+  
+    
+       public Timestamp adddays(int day) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(new Date()); // Now use today date.
+        c.add(Calendar.DAY_OF_YEAR, day); // Adding 5 days        
+        return new Timestamp(c.getTime().getTime());
+
+    }
+       public Timestamp addHour(int hour) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(new Date());// Now use today date.
+        c.add(Calendar.HOUR_OF_DAY, hour); // Adding 5 days        
+        return new Timestamp(c.getTime().getTime());
+
+    }
+       
+       public Integer countmessage(int len)
+        {
+            int result = 0;
+            if (len <= 160)
+            {
+                result = 1;
+            }
+            if ((len > 160) && (len <= 306))
+            {
+                result = 2;
+            }
+            if ((len > 306) && (len <= 459))
+            {
+                result = 3;
+            }
+            if ((len > 459) && (len <= 612))
+            {
+                result = 4;
+            }
+            return result;
+        }
+       
+       public static String getCategoryId(String pkid,int len) {
+           
+           String rs = "";
+           if(pkid==null || pkid.equals("")) {
+               for(int i=1; i<len-1;i++) {
+                   rs+='0';
+               }
+               rs+="1";
+               return rs;
+           }
+           pkid = pkid.toUpperCase();
+           pkid = pkid.replace("D", "");
+           rs="";
+           for(int k = 0; k<len - pkid.length();k++) {
+               rs+='0';
+           }
+           rs+=pkid;
+           return rs;
+       }
+}

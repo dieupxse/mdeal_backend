@@ -1,0 +1,38 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package vn.ctnet.ui;
+
+import java.io.IOException;
+import vn.ctnet.process.CheckDebit;
+import vn.ctnet.process.RenewService;
+import vn.ctnet.process.RetryRenewService;
+import vn.ctnet.process.WarningExpD1;
+import vn.ctnet.process.WarningExpFreeAccount;
+
+/**
+ *administrator/mDeal@123
+ * @author jacob
+ */
+public class Main {
+
+    public static void main(String arg[]) throws IOException {
+        vn.ctnet.process.CheckExpAccount pro = new vn.ctnet.process.CheckExpAccount();
+        pro.start();
+        vn.ctnet.process.RenewService renew = new RenewService();
+        renew.start();
+        vn.ctnet.process.RetryRenewService retry = new RetryRenewService();
+        retry.start();
+        vn.ctnet.process.CheckDebit debit = new CheckDebit();
+        debit.start();
+        vn.ctnet.process.WarningExpFreeAccount warning = new WarningExpFreeAccount();
+        warning.start();
+        vn.ctnet.process.WarningExpD1 warningD1 = new WarningExpD1();
+        warningD1.start();
+       
+    }
+    
+    
+}

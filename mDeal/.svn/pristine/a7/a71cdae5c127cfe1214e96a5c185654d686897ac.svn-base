@@ -1,0 +1,298 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License"); 
+ * you may not use this file except in compliance with the License. 
+ * You may obtain a copy of the License at
+ * 
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ */
+package org.jsmpp.ctnet;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.apache.log4j.BasicConfigurator;
+import org.jsmpp.bean.AlertNotification;
+import org.jsmpp.bean.BindType;
+import org.jsmpp.bean.DataSm;
+import org.jsmpp.bean.DeliverSm;
+import org.jsmpp.bean.DeliveryReceipt;
+import org.jsmpp.bean.MessageType;
+import org.jsmpp.bean.NumberingPlanIndicator;
+import org.jsmpp.bean.TypeOfNumber;
+import org.jsmpp.extra.ProcessRequestException;
+import org.jsmpp.session.BindParameter;
+import org.jsmpp.session.DataSmResult;
+import org.jsmpp.session.MessageReceiverListener;
+import org.jsmpp.session.SMPPSession;
+import org.jsmpp.session.Session;
+import org.jsmpp.util.InvalidDeliveryReceiptException;
+import vn.ctnet.dao.SmsMtDAO;
+import vn.ctnet.entity.SmsMt;
+/**
+ * @author uudashr
+ *
+ */
+public class RewriteSentMessage extends Thread {
+    //config
+    private final String server = getValue("smpp_server");
+    private final int port = Integer.parseInt(getValue("smpp_port"));
+    private final String user = getValue("smpp_user");
+    private final String pass = getValue("smpp_pass");
+    private final String addressRange = getValue("smpp_addressRange");
+    
+    public static SMPPSession session = null;
+    Thread th;
+    String threadName;
+    public RewriteSentMessage(String name) {
+        threadName = name;
+    }
+    
+    @Override
+    public void run() {
+        //thread goi tin nhan
+        if ("SENT".equals(threadName)) {
+            while (true) {
+                SmsMtDAO smsMtCtrl = new SmsMtDAO();
+                List<SmsMt> list = null;
+                try {
+                    list = smsMtCtrl.getSmsByStatus("PRE");
+                } catch (Exception ex) {
+                    Logger.getLogger(RewriteSentMessage.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                if (list != null && list.size() > 0) {
+                    System.out.println("sending messages");
+                    BasicConfigurator.configure();
+                    if (session == null) {
+                        session = new SMPPSession();
+                    }
+                    if (!session.getSessionState().isBound()) {
+                        try {
+                            session.connectAndBind(
+                                    server,
+                                    port,
+                                    new BindParameter(
+                                            BindType.BIND_TRX,
+                                            user,
+                                            pass,
+                                            "",
+                                            TypeOfNumber.UNKNOWN,
+                                            NumberingPlanIndicator.UNKNOWN,
+                                            addressRange
+                                    ), 3000);
+                            
+                        } catch (IOException e) {
+                            System.err.println("Failed connect and bind to host");
+                            System.out.println("Timeout try again");
+                        }
+                    }
+                    
+                    for (SmsMt list1 : list) {
+                        try {
+                            list1.setSentStatus("SENT");
+                            smsMtCtrl.update(list1);
+                            ThreadSubmitSMS sendSMS = new ThreadSubmitSMS(session, list1.getMessage(), initPhoneNumber(list1.getReciever(), 1), list1.getSender());
+                            sendSMS.start();
+                        } catch (Exception ex) {
+                            Logger.getLogger(RewriteSentMessage.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(RewriteSentMessage.class.getName()).log(Level.SEVERE, null, ex);
+                    } finally {
+                        session.unbindAndClose();
+                        session.close();
+                        session = null;
+                    }
+                }
+            }
+            
+        } 
+        //Thread nhan tin nhan
+        else {
+            while (true) {
+                final AtomicInteger counter = new AtomicInteger();
+                if (session == null) {
+                    session = new SMPPSession();
+                }
+                if (!session.getSessionState().isBound() || session.getSessionState() == session.getSessionState().CLOSED ) {                    
+                    BasicConfigurator.configure();
+                    try {
+                        session.connectAndBind(
+                                server,
+                                port,
+                                new BindParameter(
+                                        BindType.BIND_TRX,
+                                        user,
+                                        pass,
+                                        "",
+                                        TypeOfNumber.UNKNOWN,
+                                        NumberingPlanIndicator.UNKNOWN,
+                                        addressRange
+                                ), 3000);
+                        
+                    } catch (IOException e) {
+                        System.err.println("Failed connect and bind to host");
+                        System.out.println("Timeout try again after 3s:");
+                        try {
+                            Thread.sleep(3000);
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(RewriteSentMessage.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        try {
+                            session = new SMPPSession();
+                            session.connectAndBind(
+                                    server,
+                                    port,
+                                    new BindParameter(
+                                            BindType.BIND_TRX,
+                                            user,
+                                            pass,
+                                            "",
+                                            TypeOfNumber.UNKNOWN,
+                                            NumberingPlanIndicator.UNKNOWN,
+                                            addressRange
+                                    ), 3000);
+                            System.out.println("Connect SMPP Server success ...!");
+                        } catch (IOException ex) {
+                            Logger.getLogger(RewriteSentMessage.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                }
+                // Set listener to receive deliver_sm
+                session.setMessageReceiverListener(new MessageReceiverListener() {
+                    @Override
+                    public void onAcceptDeliverSm(DeliverSm deliverSm)
+                            throws ProcessRequestException {
+                        if (MessageType.SMSC_DEL_RECEIPT.containedIn(deliverSm.getEsmClass())) {
+                            counter.incrementAndGet();
+                            // delivery receipt
+                            try {
+                                DeliveryReceipt delReceipt = deliverSm.getShortMessageAsDeliveryReceipt();
+                                long id = Long.parseLong(delReceipt.getId()) & 0xffffffff;
+                                String messageId = Long.toString(id, 16).toUpperCase();
+                                System.out.println("Receiving delivery receipt for message '" + messageId + "' : " + delReceipt);
+                            } catch (InvalidDeliveryReceiptException e) {
+                                System.err.println("Failed getting delivery receipt");
+                            }
+                        } else {
+                            // regular short message
+                            if(deliverSm.getShortMessage()== null) {
+                                ThreatReceiverSMS RecSMS = new ThreatReceiverSMS("", deliverSm.getSourceAddr(), deliverSm.getDestAddress());
+                                RecSMS.start();
+                            } else {
+                                ThreatReceiverSMS RecSMS = new ThreatReceiverSMS(new String(deliverSm.getShortMessage()), deliverSm.getSourceAddr(), deliverSm.getDestAddress());
+                                RecSMS.start();
+                            }
+                            //   System.out.println("Time: "+deliverSm.getScheduleDeliveryTime().toString());
+                        }
+                    }
+
+                    @Override
+                    public DataSmResult onAcceptDataSm(DataSm dataSm, Session source)
+                            throws ProcessRequestException {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public void onAcceptAlertNotification(
+                            AlertNotification alertNotification) {
+                    }
+                });
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(RewriteSentMessage.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+           }
+        }
+        
+    }
+    
+    public String initPhoneNumber(String phone, int type) {
+        //using for smpp
+        if (type == 1) {
+            if (phone.startsWith("0")) {
+                return phone.replaceFirst("0", "84");
+            } else if (phone.startsWith("84")) {
+                return phone;
+            } else if (phone.startsWith("+84")) {
+                return phone.replace("+", "");
+            } else {
+                return phone;
+            }
+        } //using for chargin proxy
+        else {
+            if (phone.startsWith("0")) {
+                return phone.replaceFirst("0", "");
+            } else if (phone.startsWith("84")) {
+                return phone.replaceFirst("84", "");
+            } else if (phone.startsWith("+84")) {
+                return phone.replace("+84", "");
+            } else {
+                return phone;
+            }
+        }
+    }
+    
+    
+
+    public String getValue(String name) {
+        Properties prop = new Properties();
+        InputStream input = null;
+
+        try {
+            String path="C:\\mdeal_config\\config.properties";
+            input = new FileInputStream(new File(path));
+
+            // load a properties file
+            prop.load(input);
+            return prop.getProperty(name);
+
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+            return "";
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+    }
+    public  String getMessageWithSegment(String msg, int seg) {
+
+		String rs = "";
+		int partNum = (int)Math.ceil((double)msg.length() / (double)150);
+		for (int i = 1; i <= partNum; i++) {
+			if (i == seg) {
+				rs = msg.substring((seg - 1) * 150,
+						(seg * 150 > msg.length() ? msg.length() : seg * 150));
+			}
+		}
+		return rs;
+	}
+	
+	public  int countSegment(int len) {
+		
+		return (int)Math.ceil((double)len / (double)150);
+	}
+}

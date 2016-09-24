@@ -1,0 +1,46 @@
+#charging proxy config
+ownProductName = mDeal
+ownRealm = mdeal.vn
+clientPort = 3868
+ownUri = aaa://10.54.96.34:3868
+ownVendorId = 10415
+vendorId = 10415
+authApplId = 4
+acctApplId = 4
+serverHost = 10.50.9.60
+serverPort = 3868
+serverRealm = telsoft.com.vn
+CPID = 001
+SP_ID = 001
+CHARGING_PROXY_SHORT_CODE = 9193
+SP_SHORT_CODE = 9193
+IP_LOCAL = 10.54.96.34
+CHARGE_USER = mdeal
+CHARGE_PASSWORD = mdeal@123
+#database config
+db_server = 10.54.96.35
+db_port = 1433
+db_database = MDEAL_BACKEND
+db_user = sa
+db_password = mDeal@123
+#smpp config
+smpp_server = 10.151.89.78
+smpp_port = 6200
+smpp_user = mdeal
+smpp_pass = modiiil
+smpp_addressRange = 9193
+#config timeout thread - giay
+#thread chay tru tien nguoi dung
+thread_dangky = 5
+#thread kiem tra ngay het het han thue bao
+thread_check_exp_account = 15
+#thread gia han thue bao
+thread_renew = 15
+#thread retry tru tien thue bao
+thread_retry_renew = 15
+#thread canh bao het han truoc 2 ngay cho thue bao huong khuyen mai 7 ngay
+thread_warning_free = 15
+#thread thong bao gia han goi D1
+thread_warning_renew_d1 = 15
+
+

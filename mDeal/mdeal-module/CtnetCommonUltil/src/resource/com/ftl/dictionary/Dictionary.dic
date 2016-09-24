@@ -1,0 +1,8 @@
+VN
+	Name==Tiáº¿ng Viá»‡t
+	Image==images/vn_flag.png
+	File==resource/com/ftl/dictionary/VN_Dictionary.dic
+EN
+	Name==English
+	Image==images/en_flag.png
+	File==resource/com/ftl/dictionary/EN_Dictionary.dic

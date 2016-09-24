@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+ <definitions 
+ xmlns="http://schemas.xmlsoap.org/wsdl/" 
+ xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+ xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" name="CtnetVas" targetNamespace="http://ws.vn.ctnet.mdeal/" xmlns:tns="http://ws.vn.ctnet.mdeal/" xmlns:wsp="http://www.w3.org/ns/ws-policy" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsoma="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization" 
+ >
+    <message name="Register"/>
+    <message name="RegisterResponse"/>
+    <message name="Unregister"/>
+    <message name="UnregisterResponse"/>
+    <message name="CheckStatus"/>
+    <message name="CheckStatusResponse"/>
+    <message name="GetListPackage"/>
+    <message name="GetListPackageResponse"/>
+    <portType name="CtnetVas">
+        <operation name="Register">
+            <input message="tns:Register"/>
+            <output message="tns:RegisterResponse"/>
+        </operation>
+        <operation name="Unregister">
+            <input message="tns:Unregister"/>
+            <output message="tns:UnregisterResponse"/>
+        </operation>
+        <operation name="CheckStatus">
+            <input message="tns:CheckStatus"/>
+            <output message="tns:CheckStatusResponse"/>
+        </operation>
+        <operation name="GetListPackage">
+            <input message="tns:GetListPackage"/>
+            <output message="tns:GetListPackageResponse"/>
+        </operation>
+    </portType>
+    <binding name="CtnetVasPortBinding" type="tns:CtnetVas">
+        <operation name="Register">
+            <input/>
+            <output/>
+        </operation>
+        <operation name="Unregister">
+            <input/>
+            <output/>
+        </operation>
+        <operation name="CheckStatus">
+            <input/>
+            <output/>
+        </operation>
+        <operation name="GetListPackage">
+            <input/>
+            <output/>
+        </operation>
+    </binding>
+    <service name="CtnetVas">
+        <port name="CtnetVasPort" binding="tns:CtnetVasPortBinding"/>
+    </service>
+</definitions>

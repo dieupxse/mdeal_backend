@@ -1,0 +1,62 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package vn.ctnet.process;
+
+import java.math.BigInteger;
+import java.util.Date;
+import vn.ctnet.dao.SmsMtDAO;
+import vn.ctnet.entity.SmsMt;
+
+/**
+ *
+ * @author jacob
+ */
+public class SendSMS extends Thread{
+    private String msisdn, brandName, message;
+    public SendSMS(String msisdn, String brandName, String message) {
+        this.brandName = brandName;
+        this.message = message;
+        this.msisdn = msisdn;
+    }
+    @Override
+    public void run() {
+        SmsMtDAO smsmtCtl = new SmsMtDAO();
+        SmsMt smsmt = new SmsMt();
+        smsmt.setMessage(message);
+        smsmt.setMessageNum(countmessage(message.length()));
+        smsmt.setReciever(msisdn);
+        smsmt.setSmsID(BigInteger.valueOf(0));
+        smsmt.setSentTime(new Date());
+        smsmt.setSender(brandName);
+        smsmt.setSentStatus("PRE");
+        try {
+            smsmtCtl.insert(smsmt);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } 
+    }
+    public int countmessage(int message)
+        {
+            int result = 0;
+            if (message <= 160)
+            {
+                result = 1;
+            }
+            if ((message > 160) && (message <= 306))
+            {
+                result = 2;
+            }
+            if ((message > 306) && (message <= 459))
+            {
+                result = 3;
+            }
+            if ((message > 459) && (message <= 612))
+            {
+                result = 4;
+            }
+            return result;
+        }
+}

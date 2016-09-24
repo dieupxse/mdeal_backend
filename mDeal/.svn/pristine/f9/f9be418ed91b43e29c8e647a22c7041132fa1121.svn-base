@@ -1,0 +1,158 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package vn.ctnet.process;
+
+import charging.Charging;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import vn.ctnet.dao.CdrDAO;
+import vn.ctnet.dao.PackageDAO;
+import vn.ctnet.dao.ServiceDAO;
+import vn.ctnet.dao.SmsMtDAO;
+import vn.ctnet.entity.Cdr;
+import vn.ctnet.entity.Service;
+
+/**
+ *
+ * @author jacob
+ */
+public class RetryRenewService extends Thread {
+
+    Charging dia = new Charging();
+    ServiceDAO svDAO = new ServiceDAO();
+    PackageDAO pkDAO = new PackageDAO();
+    CdrDAO cdrDAO = new CdrDAO();
+    @Override
+    public void run() {
+        while (true) {
+            int timeout = Integer.parseInt(vn.ctnet.confi.Ultility.getValue("thread_retry_renew"));
+            try {
+                ArrayList<Service> lsv = svDAO.getReTryAccount();
+                if (lsv.size() > 0) {
+                    for (Service sv : lsv) {
+                        //het so lan retry thi huy dich vu
+                        if (sv.getRetry() == 0 && sv.getIsPaid() == 2 && sv.getRemainMoney() > 0) {
+                            System.out.println("Huy dich vu thue bao "+sv.getPhone());
+                            vn.ctnet.entity.Package pkg = pkDAO.getPackageByID(sv.getPackageID());
+                            sv.setStatus("0");
+                            sv.setChannel("SYS");
+                            sv.setIsPaid(3);
+                            //String msg = "Ban da gia han goi cuoc "+pkg.getPackageID()+ " gia "+pkg.getPrice()+"/"+pkg.getNumOfDate()+" ngay. ";
+
+                            String msg = vn.ctnet.confi.Ultility.getSms("msg_gh_fail");
+                            msg = msg.replace("{GOI}", sv.getPackageID());
+                            msg = msg.replace("{NGAY}", pkg.getNumOfDate() + "");
+                            msg = msg.replace("{GIA}", ((int) pkg.getPrice()) + "");
+                            SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                            msg = msg.replace("{DATE}", fm.format(sv.getExpDate()));
+                            SendSMS sendSMS = new SendSMS(sv.getPhone(),"9193",msg);
+                            sendSMS.start();
+                        } else {
+                            //con so lan retry tiep tuc thuc hien tru tien
+                            System.out.println("Gia han goi " + sv.getPackageID() + " thue bao " + sv.getPhone());
+                            vn.ctnet.entity.Package pkg = pkDAO.getPackageByID(sv.getPackageID());
+                            if (pkg != null) {
+                                String rsdb = dia.debit(vn.ctnet.confi.Ultility.initPhoneNumber(sv.getPhone(), 2), Math.round(sv.getRemainMoney()), "049193", vn.ctnet.confi.Ultility.initPhoneNumber(sv.getPhone(), 2), vn.ctnet.confi.Ultility.getCategoryId(sv.getPackageID(), 10), vn.ctnet.confi.Ultility.getCategoryId(sv.getPackageID(), 6), 272);//CPS-0000
+                                Cdr cdr = new Cdr();
+                                cdr.setChannelType(sv.getChannel());
+                                cdr.setContentID(vn.ctnet.confi.Ultility.getCategoryId(sv.getPackageID(), 10));
+                                cdr.setCost(sv.getRemainMoney());
+                                cdr.setCpid("001");
+                                cdr.setDebitTime(new Date());
+                                cdr.setEventID(vn.ctnet.confi.Ultility.getCategoryId(sv.getPackageID(), 6));
+                                cdr.setInformation("mDealCharging");
+                                cdr.setIsPushed(false);
+                                cdr.setMsisdn(sv.getPhone());
+                                cdr.setShortCode("049193");
+
+                                //tru tien con lai thanh cong thi se chuyen trang thai
+                                if (rsdb.equals("CPS-0000")) {
+                                    cdr.setStatus(1);
+                                    System.out.println("Thuc hien tru tien thue bao " + sv.getPhone() + " thanh cong");
+                                    sv.setIsPaid(1);
+                                    sv.setRemainMoney(Double.valueOf("0"));
+                                    sv.setRetry(0);
+                                    sv.setStatus("2");
+                                    sv.setStartDate(new Timestamp(new Date().getTime()));
+                                    sv.setExpDate(new Timestamp(vn.ctnet.confi.Ultility.adddays(pkg.getNumOfDate()).getTime()));
+                                    String msg = vn.ctnet.confi.Ultility.getSms("msg_gh_ok");
+                                    msg = msg.replace("{GOI}", sv.getPackageID());
+                                    msg = msg.replace("{NGAY}", pkg.getNumOfDate() + "");
+                                    msg = msg.replace("{GIA}", ((int) pkg.getPrice()) + "");
+                                    SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                                    msg = msg.replace("{DATE}", fm.format(sv.getExpDate()));
+                                    
+                                    SendSMS sendSMS = new SendSMS(sv.getPhone(),"mDeal",msg);
+                                    sendSMS.start();
+
+                                } 
+                                //Thue bao khong kha dung
+                                else if(rsdb.equals("CPS-1004") || rsdb.equals("CPS-1007") || rsdb.startsWith("CPE")) 
+                                {
+                                    cdr.setStatus(0);
+                                    sv.setIsPaid(0);
+                                    sv.setRetry(0);
+                                    sv.setAdjournDate(new Timestamp(new Date().getTime()));
+                                    sv.setStatus("0");
+                                }
+                                //tru cuoc goi D1
+                                else {
+                                    cdr.setStatus(1);
+                                    Thread.sleep(4000);
+                                    //khong thanh cong se tru goi cuoc D1
+                                    vn.ctnet.entity.Package pkd1 = pkDAO.getPackageByID("D1");
+                                    String rtrp = dia.debit(vn.ctnet.confi.Ultility.initPhoneNumber(sv.getPhone(), 2), Math.round(pkd1.getPrice()), "049193", vn.ctnet.confi.Ultility.initPhoneNumber(sv.getPhone(), 2), vn.ctnet.confi.Ultility.getCategoryId(pkd1.getPackageID(), 10), vn.ctnet.confi.Ultility.getCategoryId(pkd1.getPackageID(), 6), 272);
+                                    Cdr cdrtry = new Cdr();
+                                    cdrtry.setChannelType(sv.getChannel());
+                                    cdrtry.setContentID(vn.ctnet.confi.Ultility.getCategoryId(pkd1.getPackageID(), 10));
+                                    cdrtry.setCost(pkd1.getPrice());
+                                    cdrtry.setCpid("001");
+                                    cdrtry.setDebitTime(new Date());
+                                    cdrtry.setEventID(vn.ctnet.confi.Ultility.getCategoryId(pkd1.getPackageID(), 6));
+                                    cdrtry.setInformation("mDealCharging");
+                                    cdrtry.setIsPushed(false);
+                                    cdrtry.setMsisdn(sv.getPhone());
+                                    cdrtry.setShortCode("049193");
+                                    //tru thanh cong goi cuoc D1 se set lai so tien con phai tru va cac lan thu tiep theo
+                                    if (rtrp.equals("CPS-0000")) {
+                                        cdrtry.setStatus(1);
+                                        sv.setIsPaid(2);
+                                        sv.setRemainMoney(sv.getRemainMoney() - pkd1.getPrice());
+                                        sv.setRetry(sv.getRetry() - 1);
+                                        sv.setAdjournDate(new Timestamp(vn.ctnet.confi.Ultility.addHour(12).getTime()));
+                                    } else {
+                                        cdrtry.setStatus(0);
+                                        //giam so lan retry va set lai ngay gio retry
+                                        sv.setIsPaid(2);
+                                        sv.setRetry(sv.getRetry() - 1);
+                                        sv.setAdjournDate(new Timestamp(vn.ctnet.confi.Ultility.addHour(12).getTime()));
+                                    }
+                                    cdrDAO.insert(cdrtry);
+                                }
+                                cdrDAO.insert(cdr);
+                            }
+                        }
+                        svDAO.update(sv);
+                    }
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+
+            }
+            try {
+                Thread.sleep(timeout*1000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(RetryRenewService.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+}
