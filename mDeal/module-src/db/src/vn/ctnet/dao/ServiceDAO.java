@@ -310,7 +310,7 @@ public class ServiceDAO {
         ArrayList<Service> list = null;
         Database DB = new Database();
         Connection conn = DB.connection();
-        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE Status ='2' and PackageID = 'D1' and isPaid=1 and isPushMsg >= " + this.numOfRenewD1 + " and (isPushMsg % " + this.numOfRenewD1 + ")=0");
+        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE Status ='2' and PackageID = 'D1' and isPaid=1 and RegDate >='2016-10-01 00:00:01' and isPushMsg >= " + this.numOfRenewD1 + "");
         ResultSet rs = pstm.executeQuery();
         if (rs != null) {
             list = new ArrayList<Service>();
@@ -358,7 +358,7 @@ public class ServiceDAO {
         ArrayList<Service> list = null;
         Database DB = new Database();
         Connection conn = DB.connection();
-        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE Status ='2' and PackageID = 'D7' and isPaid=1 and isPushMsg >= " + this.numOfRenewD7 + " and (isPushMsg % " + this.numOfRenewD7 + ")=0");
+        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE Status ='2' and PackageID = 'D7' and RegDate >='2016-10-01 00:00:01' and isPaid=1 and isPushMsg >= " + this.numOfRenewD7 + "");
         ResultSet rs = pstm.executeQuery();
         if (rs != null) {
             list = new ArrayList<Service>();
@@ -406,7 +406,7 @@ public class ServiceDAO {
         ArrayList<Service> list = null;
         Database DB = new Database();
         Connection conn = DB.connection();
-        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE Status ='2' and PackageID = 'D30' and isPaid=1 and isPushMsg >= " + this.numOfRenewD30 + " and (isPushMsg % " + this.numOfRenewD30 + ")=0");
+        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE Status ='2' and PackageID = 'D30' and RegDate >='2016-10-01 00:00:01' and isPaid=1 and isPushMsg >= " + this.numOfRenewD30 + "");
         ResultSet rs = pstm.executeQuery();
         if (rs != null) {
             list = new ArrayList<Service>();
@@ -545,11 +545,12 @@ public class ServiceDAO {
         return list;
     }
 
-    public Service getServiceByPhone(String phone) throws ClassNotFoundException, SQLException {
-        Database DB = new Database();
-        Connection conn = DB.connection();
-        String sql = "SELECT * FROM SERVICE WHERE Phone = ?";
+    public Service getServiceByPhone(String phone)  {
+        
         try {
+            Database DB = new Database();
+            Connection conn = DB.connection();
+            String sql = "SELECT * FROM SERVICE WHERE Phone = ?";
             PreparedStatement pstm = conn.prepareStatement(sql);
             pstm.setString(1, phone);
             ResultSet rs = pstm.executeQuery();

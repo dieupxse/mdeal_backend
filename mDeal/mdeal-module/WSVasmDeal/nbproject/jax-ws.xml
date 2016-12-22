@@ -4,6 +4,9 @@
     <service name="CtnetVas">
       <implementation-class>mdeal.ctnet.vn.ws.CtnetVas</implementation-class>
     </service>
+    <service name="vasapi">
+      <implementation-class>mdeal.ctnet.vn.ws.vas.vasapi</implementation-class>
+    </service>
   </services>
   <clients/>
   <jsr109>false</jsr109>

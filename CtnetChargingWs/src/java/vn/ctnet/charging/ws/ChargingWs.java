@@ -33,7 +33,11 @@ public class ChargingWs {
      * @return
      */
     @WebMethod(operationName = "Register")
-    public Reply Register(@WebParam(name = "msisdn") String msisdn, @WebParam(name = "packageCode") String packageCode, @WebParam(name = "channel") String channel,@WebParam(name = "user") String user) {
+    public Reply Register(
+            @WebParam(name = "msisdn") String msisdn, 
+            @WebParam(name = "packageCode") String packageCode, 
+            @WebParam(name = "channel") String channel,
+            @WebParam(name = "user") String user) {
         //TODO write your implementation code here:
         OutputString output = new OutputString();
         try {
@@ -49,12 +53,17 @@ public class ChargingWs {
     }
     
     @WebMethod(operationName = "RegisterDirect")
-    public Reply RegisterDirect(@WebParam(name = "msisdn") String msisdn, @WebParam(name = "packageCode") String packageCode, @WebParam(name = "channel") String channel) {
+    public Reply RegisterDirect(
+            @WebParam(name = "msisdn") String msisdn, 
+            @WebParam(name = "packageCode") String packageCode, 
+            @WebParam(name = "channel") String channel
+        )
+    {
         //TODO write your implementation code here:
         OutputString output = new OutputString();
         try {
             ServiceProcess sm = new ServiceProcess();
-            String rs = sm.register_direct(initPhoneNumber(msisdn, 3), packageCode, 0,channel,charging);
+            String rs = sm.register_direct(initPhoneNumber(msisdn, 3), packageCode, 0,channel,charging,"");
             rs = rs.replace("|", ":");
             String message = rs.replace(":", "|");
             return output.register(rs.split(":")[0], message);
@@ -64,7 +73,12 @@ public class ChargingWs {
 
     }
     @WebMethod(operationName = "RegisterCustom")
-    public Reply RegisterCustom(@WebParam(name = "msisdn") String msisdn, @WebParam(name = "packageCode") String packageCode, @WebParam(name = "channel") String channel,@WebParam(name = "statusMT") String statusMT,@WebParam(name = "note") String note) {
+    public Reply RegisterCustom(
+            @WebParam(name = "msisdn") String msisdn, 
+            @WebParam(name = "packageCode") String packageCode, 
+            @WebParam(name = "channel") String channel,
+            @WebParam(name = "statusMT") String statusMT,
+            @WebParam(name = "note") String note) {
         //TODO write your implementation code here:
         OutputString output = new OutputString();
         try {
@@ -88,7 +102,11 @@ public class ChargingWs {
      * @return
      */
     @WebMethod(operationName = "Unregister")
-    public Reply Unregister(@WebParam(name = "msisdn") String msisdn, @WebParam(name = "packageCode") String packageCode, @WebParam(name = "channel") String channel,@WebParam(name = "user") String user) {
+    public Reply Unregister(
+            @WebParam(name = "msisdn") String msisdn, 
+            @WebParam(name = "packageCode") String packageCode, 
+            @WebParam(name = "channel") String channel,
+            @WebParam(name = "user") String user) {
         //TODO write your implementation code here:
         OutputString output = new OutputString();
         try {
@@ -155,7 +173,24 @@ public class ChargingWs {
             return rp;
         } 
     }
-
+    /**
+     * Get Profile
+     * @param msisdn
+     * @return 
+     */
+    @WebMethod(operationName = "GetProfile")
+    public Service GetProfile(@WebParam(name="msisdn")String msisdn) {
+        try{
+            ServiceProcess sm = new ServiceProcess();
+            Service sv = sm.getService(initPhoneNumber(msisdn,3));
+            return sv;
+        } catch(Exception e) {
+            return null;
+        }
+        
+    }
+    
+    
     public String initPhoneNumber(String phone, int type) {
         //using for smpp
         if (type == 1) {

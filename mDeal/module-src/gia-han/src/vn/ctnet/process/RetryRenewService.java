@@ -45,21 +45,23 @@ public class RetryRenewService extends Thread {
                         if (sv.getRetry() == 0 && sv.getIsPaid() == 2 && sv.getRemainMoney() > 0) {
                             System.out.println("Huy dich vu thue bao " + sv.getPhone());
                             vn.ctnet.entity.Package pkg = pkDAO.getPackageByID(sv.getPackageID());
-                            //sv.setStatus("0");
-                            //sv.setChannel("SYS");
-                            //sv.setIsPaid(0);
+                            sv.setStatus("0");
+                            sv.setChannel("SYS");
+                            sv.setIsPaid(0);
                             sv.setModifiedDate(new Timestamp(new Date().getTime()));
-                            //sv.setExpDate(new Timestamp(new Date().getTime()));
-                            sv.setRetry(numofretry);
-                            sv.setAdjournDate(new Timestamp(vn.ctnet.confi.Ultility.addHour(72).getTime()));
-                            //sv.setRemainMoney(Double.valueOf("0"));
-                            sv.setRemainAdjournDate(numofretry/2);
-                            //String msg = "Ban da gia han goi cuoc "+pkg.getPackageID()+ " gia "+pkg.getPrice()+"/"+pkg.getNumOfDate()+" ngay. ";
-                            /*
+                            sv.setExpDate(new Timestamp(new Date().getTime()));
+                            sv.setRemainMoney(Double.valueOf("0"));
+                            //Khong huy dich vu ma set retry lai sau 3 ngay
+                            //sv.setRetry(numofretry);
+                            //sv.setAdjournDate(new Timestamp(vn.ctnet.confi.Ultility.addHour(72).getTime()));
+                            //sv.setRemainAdjournDate(numofretry/2);
+                            //sv.setModifiedDate(new Timestamp(new Date().getTime()));
+                           
                             
-                            Gui tin bao huy thanh cong 
-                            */
-                            /*if (enable_mt_renew_fail != null && enable_mt_renew_fail.equals("1")) {
+                            
+                            //Gui tin bao huy thanh cong 
+                            
+                            if (enable_mt_renew_fail != null && enable_mt_renew_fail.equals("1")) {
                                 String msg = vn.ctnet.confi.Ultility.getSms("msg_gh_fail");
                                 msg = msg.replace("{GOI}", pkg.getPackageID());
                                 msg = msg.replace("{NGAY}", pkg.getNumOfDate() + "");
@@ -69,7 +71,7 @@ public class RetryRenewService extends Thread {
                                 SendSMS sendSMS = new SendSMS(sv.getPhone(), "9193", msg);
                                 sendSMS.start();
                             }
-                            */
+                            
                         } else {
                             //con so lan retry tiep tuc thuc hien tru tien
                             System.out.println("Gia han goi " + sv.getPackageID() + " thue bao " + sv.getPhone());

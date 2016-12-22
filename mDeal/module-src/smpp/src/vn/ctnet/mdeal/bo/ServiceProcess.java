@@ -24,7 +24,7 @@ import vn.ctnet.dao.ServiceDAO;
 import vn.ctnet.entity.Cdr;
 import vn.ctnet.entity.Profile;
 import vn.ctnet.entity.Service;
-
+import vn.ctnet.mdeal.entity.ReturnRegister;
 /**
  *
  * @author jacob Class này thực hiện cho việc đăng ký qua webservice bình
@@ -328,6 +328,7 @@ public class ServiceProcess {
         return respone;
 
     }
+    
 
     /**
      * Hàm đăng ký trực tiếp, trừ tiền trực tiếp đối với tất cả thuê bao
@@ -337,83 +338,161 @@ public class ServiceProcess {
      * @param smsID
      * @param chanel
      * @param chargin
+     * @param username
      * @return
      */
-    public String register_direct(String msisdn, String packageID, long smsID, String chanel, Charging chargin) {
+    public ReturnRegister register_direct(String msisdn, String packageID, long smsID, String chanel, Charging chargin,String username) {
 
-        /**
-         * Make sure package ID exist
-         */
-        if (packageID == null || "".equals(packageID)) {
-            packageID = "D1";
-        }
-
-        packageID = packageID.toUpperCase();
-        String respone = "";
-        vn.ctnet.entity.Package pack = null;
-        Date d = new Date();
+        ReturnRegister rs = new ReturnRegister();
         try {//try level 1
-            pack = packCtl.getPackageByID(packageID);
-            //khong tim thay goi cuoc
-            if (pack == null || pack.getPackageID() == null) {
-                //tin nhan sai cu phap
-                /*String msg = getSms("msg_wrong");
-                 sendSMS(msisdn, "9193", msg, smsID);
-                 return "0|DANG_KY_KHONG_THANH_CONG_XIN_VUI_LONG_THU_LAI_SAU."; */
+            rs = DoCharging(msisdn, packageID, smsID, chanel, chargin, username);
+            switch(rs.getReturnCode()) {
+                case "-1":
+                    addNewProfile(msisdn);
+                    if(AddService(msisdn, chanel, username, packageID)) {
+                        return register_direct(msisdn, packageID, smsID, chanel, chargin, username);
+                    } else {
+                        rs.setReturnCode("0");
+                        rs.setReturnDesc("KHONG THE KHOI TAO THONG TIN KHACH HANG");
+                        return rs;
+                    }
+                default:
+                    return rs;
+            }
+            //catch level 1
+        } catch (Exception e) {  
+            rs.setReturnCode("0");
+            rs.setReturnDesc(e.getMessage());
+            return rs;
+        }
+    }
+    
+    public ReturnRegister register_free(String msisdn, String packageID, int price, int day, long smsID, String chanel, Charging chargin,String username) {
+
+        ReturnRegister rs = new ReturnRegister();
+        try {//try level 1
+            rs = DoChargingCustom(msisdn, packageID,price,day,1,smsID, chanel, chargin, username);
+            switch(rs.getReturnCode()) {
+                case "-1":
+                    addNewProfile(msisdn);
+                    if(AddService(msisdn, chanel, username, packageID)) {
+                        return register_free(msisdn, packageID,price,day,smsID, chanel, chargin, username);
+                    } else {
+                        rs.setReturnCode("0");
+                        rs.setReturnDesc("KHONG THE KHOI TAO THONG TIN KHACH HANG");
+                        return rs;
+                    }
+                default:
+                    return rs;
+            }
+            //catch level 1
+        } catch (Exception e) {  
+            rs.setReturnCode("0");
+            rs.setReturnDesc(e.getMessage());
+            return rs;
+        }
+    }
+    
+    public ReturnRegister register_free_cycle(String msisdn, String packageID, int price, int cycle, long smsID, String chanel, Charging chargin,String username) {
+
+        ReturnRegister rs = new ReturnRegister();
+        try {//try level 1
+            vn.ctnet.entity.Package pack = packCtl.getPackageByID(packageID);
+            if(pack==null || pack.getPackageID()==null) {
                 pack = packCtl.getPackageByID("D1");
             }
-            //kiem tra han su dung neu con thong bao ve cho nguoi dung
-            //try level 2
-            try {
+            rs = DoChargingCustom(msisdn, packageID,price,pack.getNumOfDate(),cycle,smsID, chanel, chargin, username);
+            switch(rs.getReturnCode()) {
+                case "-1":
+                    addNewProfile(msisdn);
+                    if(AddService(msisdn, chanel, username, packageID)) {
+                        return register_free_cycle(msisdn, packageID,price,cycle,smsID, chanel, chargin, username);
+                    } else {
+                        rs.setReturnCode("0");
+                        rs.setReturnDesc("KHONG THE KHOI TAO THONG TIN KHACH HANG");
+                        rs.setCycle(cycle);
+                        return rs;
+                    }
+                default:
+                    return rs;
+            }
+            //catch level 1
+        } catch (Exception e) {  
+            rs.setReturnCode("0");
+            rs.setReturnDesc(e.getMessage());
+            return rs;
+        }
+    }
 
-                vn.ctnet.entity.Service service = serviceDao.getServiceByPhone(msisdn);
-                //serviec co roi
-                //try level 3
+    public ReturnRegister DoCharging(String msisdn, String packageID, long smsID, String chanel, Charging chargin,String username) {
+        System.out.println("Call Do Charging");
+        ReturnRegister result = new ReturnRegister();
+        try {
+            packageID = packageID.toUpperCase();
+            vn.ctnet.entity.Package pack = null;
+            if (packageID == null || "".equals(packageID)) {
+                packageID = "D1";
+            }
+            pack = packCtl.getPackageByID(packageID);
+            return DoChargingCustom(msisdn, packageID,(int) pack.getPrice(), (int)pack.getNumOfDate(),1, smsID, chanel, chargin, username);
+        }catch(Exception e) {
+            result.setReturnCode("0");
+            result.setReturnDesc("DANG KY KHONG THANH CONG");
+        }
+        return result;
+    }
+    
+    public ReturnRegister DoChargingCustom(String msisdn, String packageID, int price, int day, int cycle, long smsID, String chanel, Charging chargin,String username) {
+        System.out.println("Call Do Charging");
+        ReturnRegister result = new ReturnRegister();
+        result.setCycle(cycle);
+        try {
+            packageID = packageID.toUpperCase();
+            vn.ctnet.entity.Package pack = null;
+            if (packageID == null || "".equals(packageID)) {
+                packageID = "D1";
+            }
+            pack = packCtl.getPackageByID(packageID);
+            Date d = new Date();
+            vn.ctnet.entity.Service service = serviceDao.getServiceByPhone(msisdn);
+            if(service!=null) {
+                if (d.before(service.getExpDate()) && (!service.getStatus().equals("0")) && (!service.getStatus().equals("4"))) {
+                    result.setReturnCode("2");
+                    result.setReturnDesc("GOI CUOC DA TON TAI");
+                    return result;
+                }
+            //try level 3
                 try {
                     //login charing tru tien
-                    String rs = chargin.debit(msisdn, (long) pack.getPrice(), "049193", msisdn, vn.ctnet.mdeal.config.Utils.getCategoryId(pack.getPackageID(), 10), vn.ctnet.mdeal.config.Utils.getCategoryId(pack.getPackageID(), 6), 272);
+                    String rs = chargin.debit(msisdn, (long)price, "049193", msisdn, vn.ctnet.mdeal.config.Utils.getCategoryId(pack.getPackageID(), 10), vn.ctnet.mdeal.config.Utils.getCategoryId(pack.getPackageID(), 6), 272);
                     Cdr cdr = new Cdr();
                     cdr.setMsisdn(msisdn);
                     cdr.setShortCode("049193");
                     cdr.setEventID(vn.ctnet.mdeal.config.Utils.getCategoryId(pack.getPackageID(), 6));
                     cdr.setCpid("001001");
                     cdr.setContentID(vn.ctnet.mdeal.config.Utils.getCategoryId(pack.getPackageID(), 10));
-                    cdr.setCost(pack.getPrice());
+                    cdr.setCost((double)price);
                     cdr.setChannelType(chanel);
                     cdr.setInformation("Charging" + chanel);
                     cdr.setDebitTime(new Date());
                     cdr.setIsPushed(false);
-
                     if ("CPS-0000".equals(rs)) {
                         //tru tien thanh cong
-                        service.setExpDate(new Timestamp(vn.ctnet.mdeal.config.Utils.adddays(pack.getNumOfDate()).getTime()));
+                        service.setExpDate(new Timestamp(vn.ctnet.mdeal.config.Utils.adddays(day*cycle).getTime()));
                         service.setChannel(chanel);
                         service.setPackageID(packageID.toUpperCase());
                         service.setStatus("3");
                         service.setIsPaid(1);
                         service.setModifiedDate(new Timestamp(new Date().getTime()));
-                        // serviceCtl.edit(service);
-                        String msg = getSms("msg_dk_ok");
-                        msg = msg.replace("{GOI}", pack.getPackageID());
-                        msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
-                        msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
-                        SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
-                        msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
-
-                        String status = "PRE";
-                        String isModifiedMt = getValue("modified_mt");
-                        if (isModifiedMt != null && isModifiedMt.equals("1")) {
-                            int rand = randInt(1, 10);
-                            if (rand % 2 == 0) {
-                                status = "PRE";
-                            } else {
-                                status = "SENT";
-                            }
-                        }
-                        sendSMS(msisdn, "mDeal", msg, smsID, status);
-
+                        service.setUserModified(username);
                         SimpleDateFormat format = new SimpleDateFormat("ddMMyyyy");
-                        respone = "1|" + pack.getPackageID() + "|" + (int) pack.getPrice() + "|" + format.format(service.getExpDate());
+                        
+                        result.setReturnCode("1");
+                        result.setReturnDesc("DANG KY THANH CONG");
+                        result.setChargingResult(rs);
+                        result.setPackageId( pack.getPackageID());
+                        result.setPrice(price);
+                        
                         cdr.setStatus(1);
                     } else if ("CPS-1001".equals(rs)) {
                         cdr.setStatus(0);
@@ -425,201 +504,79 @@ public class ServiceProcess {
                         service.setRemainAdjournDate(pack.getNumOfDate());
                         service.setRetry(120);
                         service.setRemainMoney(pack.getPrice());
-
-                        respone = "3|THUE_BAO_KHONG_DU_TIEN";
-                        String msg = getSms("msg_dk_fail");
-                        msg = msg.replace("{GOI}", pack.getPackageID());
-                        msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
-                        msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
-                        SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
-                        msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
-                        sendSMS(msisdn, "9193", msg, smsID);
+                        service.setUserModified(username);
+                        
+                        result.setReturnCode("3");
+                        result.setReturnDesc("THUE BAO KHONG DU TIEN");
+                        result.setChargingResult(rs);
+                        
                     } else if ("CPS-1002".equals(rs) || "CPS-1003".equals(rs) || "CPS-1004".equals(rs)) {
                         cdr.setStatus(0);
-                        respone = "0|DANG_KY_KHONG_THANH_CONG_XIN_VUI_LONG_THU_LAI_SAU";
-                        String msg = getSms("msg_dk_fail");
-                        msg = msg.replace("{GOI}", pack.getPackageID());
-                        msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
-                        msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
-                        SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
-                        msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
-                        sendSMS(msisdn, "9193", msg, smsID);
+                        
+                        result.setReturnCode("0");
+                        result.setReturnDesc("DANG KY KHONG THANH CONG");
+                        result.setChargingResult(rs);
+                        
                     } else {
                         cdr.setStatus(0);
-                        String msg = getSms("msg_err_sys");
-                        msg = msg.replace("{GOI}", pack.getPackageID());
-                        msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
-                        msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
-                        SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
-                        msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
-                        sendSMS(msisdn, "9193", msg, smsID);
-                        respone = "0|DANG_KY_KHONG_THANH_CONG_XIN_VUI_LONG_THU_LAI_SAU";
-
+                        
+                        result.setReturnCode("0");
+                        result.setReturnDesc("LOI KHONG THE TRU TIEN");
+                        result.setChargingResult(rs);
                     }
 
                     try {
+                        //ghi log tru cuoc va cap nhat thue bao
                         cdrCtrl.insert(cdr);
                         serviceDao.update(service);
-                        System.out.println("Ghi long tru cuoc CDR");
                     } catch (Exception e) {
-                        System.out.println("Ghi long tru cuoc CDR ERROR !!!!!!!!");
-                        System.out.println(e.getMessage());
-                        respone = "0|DANG_KY_KHONG_THANH_CONG_XIN_VUI_LONG_THU_LAI_SAU";
+                        result.setReturnCode("0");
+                        result.setReturnDesc(e.getMessage());
+                        result.setChargingResult(rs);
                     }
                     //catch level 3
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    System.out.println(e.getMessage());
-                    respone = "0|DANG_KY_KHONG_THANH_CONG_XIN_VUI_LONG_THU_LAI_SAU";
+                    result.setReturnCode("0");
+                    result.setReturnDesc(e.getMessage());
                 }
-
-                //catch level 2
-            } catch (Exception e) {
-                /**
-                 * Chua tung dang ky dich vu Dang ky moi goi cuoc Thuc hien tru
-                 * cuoc binh thuong
-                 */
-                try {
-                    System.out.println("Tao moi profile");
-                    addNewProfile(msisdn);
-                } catch (Exception ex) {
-                    System.out.println("Profile da ton tai");
-                    System.out.println(ex.getMessage());
-                }
-
-                vn.ctnet.entity.Service service = serviceDao.getServiceByPhone(msisdn);
-                /**
-                 * thao tac tru tien truc tiep cho khach hang
-                 */
-                try {
-                    //login charing tru tien
-                    String rs = chargin.debit(msisdn, (long) pack.getPrice(), "049193", msisdn, vn.ctnet.mdeal.config.Utils.getCategoryId(pack.getPackageID(), 10), vn.ctnet.mdeal.config.Utils.getCategoryId(pack.getPackageID(), 6), 272);
-                    Cdr cdr = new Cdr();
-                    cdr.setMsisdn(msisdn);
-                    cdr.setShortCode("049193");
-                    cdr.setEventID(vn.ctnet.mdeal.config.Utils.getCategoryId(pack.getPackageID(), 6));
-                    cdr.setCpid("001001");
-                    cdr.setContentID(vn.ctnet.mdeal.config.Utils.getCategoryId(pack.getPackageID(), 10));
-                    cdr.setCost(pack.getPrice());
-                    cdr.setChannelType(chanel);
-                    cdr.setInformation("Charging" + chanel);
-                    cdr.setDebitTime(new Date());
-                    cdr.setIsPushed(false);
-
-                    if ("CPS-0000".equals(rs)) {
-                        //tru tien thanh cong
-                        service.setExpDate(new Timestamp(vn.ctnet.mdeal.config.Utils.adddays(pack.getNumOfDate()).getTime()));
-                        service.setChannel(chanel);
-                        service.setPackageID(packageID.toUpperCase());
-                        service.setStatus("3");
-                        service.setIsPaid(1);
-                        service.setModifiedDate(new Timestamp(new Date().getTime()));
-                        // serviceCtl.edit(service);
-                        String msg = getSms("msg_dk_ok");
-                        msg = msg.replace("{GOI}", pack.getPackageID());
-                        msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
-                        msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
-                        SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
-                        msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
-
-                        String status = "PRE";
-                        String isModifiedMt = getValue("modified_mt");
-                        if (isModifiedMt != null && isModifiedMt.equals("1")) {
-                            int rand = randInt(1, 10);
-                            if (rand % 2 == 0) {
-                                status = "PRE";
-                            } else {
-                                status = "SENT";
-                            }
-                        }
-                        sendSMS(msisdn, "mDeal", msg, smsID, status);
-
-                        SimpleDateFormat format = new SimpleDateFormat("ddMMyyyy");
-                        respone = "1|" + pack.getPackageID() + "|" + (int) pack.getPrice() + "|" + format.format(service.getExpDate());
-                        cdr.setStatus(1);
-                    } else if ("CPS-1001".equals(rs)) {
-                        cdr.setStatus(0);
-                        respone = "3|THUE_BAO_KHONG_DU_TIEN";
-                        String msg = getSms("msg_dk_fail");
-                        msg = msg.replace("{GOI}", pack.getPackageID());
-                        msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
-                        msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
-                        SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
-                        msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
-                        sendSMS(msisdn, "9193", msg, smsID);
-                    } else if ("CPS-1002".equals(rs)) {
-                        cdr.setStatus(0);
-                        respone = "0|DANG_KY_KHONG_THANH_CONG_XIN_VUI_LONG_THU_LAI_SAU";
-                        String msg = getSms("msg_dk_fail");
-                        msg = msg.replace("{GOI}", pack.getPackageID());
-                        msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
-                        msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
-                        SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
-                        msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
-                        sendSMS(msisdn, "9193", msg, smsID);
-                    } else if ("CPS-1003".equals(rs)) {
-                        cdr.setStatus(0);
-                        respone = "0|DANG_KY_KHONG_THANH_CONG_XIN_VUI_LONG_THU_LAI_SAU";
-                        String msg = getSms("msg_dk_fail");
-                        msg = msg.replace("{GOI}", pack.getPackageID());
-                        msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
-                        msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
-                        SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
-                        msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
-                        sendSMS(msisdn, "9193", msg, smsID);
-                    } else if ("CPS-1004".equals(rs)) {
-                        cdr.setStatus(0);
-                        String msg = getSms("msg_dk_fail");
-                        msg = msg.replace("{GOI}", pack.getPackageID());
-                        msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
-                        msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
-                        SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
-                        msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
-                        sendSMS(msisdn, "9193", msg, smsID);
-                        respone = "0|DANG_KY_KHONG_THANH_CONG_XIN_VUI_LONG_THU_LAI_SAU";
-                    } else {
-                        cdr.setStatus(0);
-                        String msg = getSms("msg_err_sys");
-                        msg = msg.replace("{GOI}", pack.getPackageID());
-                        msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
-                        msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
-                        SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
-                        msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
-                        sendSMS(msisdn, "9193", msg, smsID);
-                        respone = "0|DANG_KY_KHONG_THANH_CONG_XIN_VUI_LONG_THU_LAI_SAU";
-
-                    }
-
-                    try {
-                        cdrCtrl.insert(cdr);
-                        serviceDao.update(service);
-                        System.out.println("Ghi long tru cuoc CDR");
-                    } catch (Exception ex) {
-                        System.out.println("Ghi long tru cuoc CDR ERROR !!!!!!!!");
-                        System.out.println(ex.getMessage());
-                        respone = "0|DANG_KY_KHONG_THANH_CONG_XIN_VUI_LONG_THU_LAI_SAU";
-                    }
-                } catch (Exception exx) {
-                    exx.printStackTrace();
-                    System.out.println(exx.getMessage());
-                    respone = "0|DANG_KY_KHONG_THANH_CONG_XIN_VUI_LONG_THU_LAI_SAU";
-                }
-
-            }
-
-            //catch level 1
+            } else {
+                result.setReturnCode("-1");
+                result.setReturnDesc("THUE BAO CHUA TON TAI TREN HE THONG");
+            }   
         } catch (Exception e) {
-            //ko co
-            // e.printStackTrace();
-            String msg = getSms("msg_wrong");
-            sendSMS(msisdn, "9193", msg, smsID);
-            respone = "0|DANG_KY_KHONG_THANH_CONG_XIN_VUI_LONG_THU_LAI_SAU";
+            result.setReturnCode("0");
+            result.setReturnDesc(e.getMessage());
         }
-
-        return respone;
-
+        return result;
     }
-
+    
+    public boolean AddService(String msisdn, String channel, String username, String packageId) {
+        try{
+            Service service = new Service();
+            service.setSmsmoID(BigInteger.valueOf(0));
+            service.setPhone(msisdn);
+            service.setPackageID(packageId);
+            service.setRegDate(new Timestamp(new Date().getTime()));
+            service.setStartDate(new Timestamp(new Date().getTime()));
+            service.setExpDate(new Timestamp(new Date().getTime()));
+            service.setChannel(channel);
+            service.setIsSynched(false);
+            service.setAutoAdjourn(true);
+            service.setModifiedDate(new Date());
+            service.setStatus("0");
+            service.setIsPaid(0);
+            service.setRegisterChannel(channel);
+            service.setModifiedDate(new Timestamp(new Date().getTime()));
+            service.setNote("DK_VIA_"+channel);
+            service.setUserModified(username);
+            //Cập nhật thông tin thuê bao
+            serviceDao.insert(service);
+            return true;
+        } catch(Exception e) {
+            return false;
+        }
+        
+    }
     /**
      * Hàm hủy thuê bao
      *
@@ -702,6 +659,160 @@ public class ServiceProcess {
         return respone;
 
     }
+    
+    public ReturnRegister unregister_no_mt(String msisdn, String packageID, String chanel,String user) {
+
+        ReturnRegister rs = new ReturnRegister();
+        vn.ctnet.entity.Package pack;
+        try {
+            pack = packCtl.getPackageByID(packageID);
+            if (pack == null) {
+                //String msg = getSms("msg_wrong");
+                //sendSMS(msisdn, "9193", msg, smsID);
+                rs.setReturnCode("0");
+                rs.setReturnDesc("GOI CUOC KHONG TON TAI TREN HE THONG");
+                return rs;
+            }
+            try {
+
+                Date d = new Date();
+                vn.ctnet.entity.Service service = serviceDao.getServiceByPhone(msisdn);
+                //serviec co roi
+                if ( //huy dich vu khi dich vu dang hoat dong
+                        (d.before(service.getExpDate()) //con han su dung
+                        && (!service.getStatus().equals("0")) //trang thai dang kich hoat
+                        && service.getPackageID().equals(pack.getPackageID())//goi cuoc co ton tai
+                        )
+                        || (service.getStatus().equals("4") //trang thai dang kich hoat
+                        && service.getPackageID().equals(pack.getPackageID())//goi cuoc co ton tai
+                        )) {
+                    service.setStatus("0");
+                    service.setChannel(chanel);
+                    service.setAutoAdjourn(false);
+                    service.setExpDate(new Timestamp(new Date().getTime()));
+                    service.setStartDate(new Timestamp(new Date().getTime()));
+                    service.setModifiedDate(new Timestamp(new Date().getTime()));
+                    service.setUserModified(user);
+                    serviceDao.update(service);
+                    /*String msg = getSms("msg_huy_ok");
+                    msg = msg.replace("{GOI}", pack.getPackageID());
+                    msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
+                    msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
+                    SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                    msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
+                    sendSMS(msisdn, "9193", msg, smsID);*/
+                    rs.setReturnCode("1");
+                    rs.setReturnDesc("HUY DICH VU THANH CONG");
+                    rs.setPackageId(packageID);
+                    rs.setPrice((int)pack.getPrice());
+                    return rs;
+                } else {
+                    /*String msg = getSms("msg_huy_not_exist");
+                    msg = msg.replace("{GOI}", pack.getPackageID());
+                    msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
+                    msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
+                    SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                    msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
+                    sendSMS(msisdn, "9193", msg, smsID);
+                    respone = "2|HUY_KHONG_THANH CONG_DO_THUE_BAO_CHUA_DANG_KY";*/
+                    rs.setReturnCode("2");
+                    rs.setReturnDesc("HUY KHONG THANH CONG DO THUE BAO CHUA DANG KY GOI CUOC");
+                    return rs;
+                }
+
+            } catch (Exception e) {
+                //service chua co,DK moi 
+                /*String msg = getSms("msg_huy_not_exist");
+                msg = msg.replace("{GOI}", pack.getPackageID());
+                msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
+                msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
+                SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                sendSMS(msisdn, "9193", msg, smsID);
+                respone = "0|HUY_KHONG_THANH_CONG_XIN_VUI_LONG_THU_LAI_SAU";*/
+                rs.setReturnCode("0");
+                rs.setReturnDesc("HUY KHONG THANH CONG DO LOI HE THONG");
+                return rs;
+            }
+        } catch (Exception e) {
+            rs.setReturnCode("0");
+            rs.setReturnDesc("HUY KHONG THANH CONG DO LOI HE THONG");
+            return rs;
+        }
+    }
+    
+    public ReturnRegister checkstatusbonus(String msisdn, String packageID) {
+
+        ReturnRegister rs = new ReturnRegister();
+        vn.ctnet.entity.Package pack;
+        try {
+            pack = packCtl.getPackageByID(packageID);
+            if (pack == null) {
+                //String msg = getSms("msg_wrong");
+                //sendSMS(msisdn, "9193", msg, smsID);
+                rs.setReturnCode("2");
+                rs.setReturnDesc("GOI CUOC KHONG TON TAI TREN HE THONG");
+                return rs;
+            }
+            try {
+
+                Date d = new Date();
+                vn.ctnet.entity.Service service = serviceDao.getServiceByPhone(msisdn);
+                //serviec co roi
+                if ( //huy dich vu khi dich vu dang hoat dong
+                        (d.before(service.getExpDate()) //con han su dung
+                        && (!service.getStatus().equals("0")) //trang thai dang kich hoat
+                        && service.getPackageID().equals(pack.getPackageID())//goi cuoc co ton tai
+                        )
+                        || (service.getStatus().equals("4") //trang thai dang kich hoat
+                        && service.getPackageID().equals(pack.getPackageID())//goi cuoc co ton tai
+                        )) {
+                    
+                    /*String msg = getSms("msg_huy_ok");
+                    msg = msg.replace("{GOI}", pack.getPackageID());
+                    msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
+                    msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
+                    SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                    msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
+                    sendSMS(msisdn, "9193", msg, smsID);*/
+                    rs.setReturnCode("0");
+                    rs.setReturnDesc("GOI CUOC DA TON TAI VA DANG KHA DUNG TREN HE THONG");
+                    rs.setPackageId(packageID);
+                    rs.setPrice((int)pack.getPrice());
+                    return rs;
+                } else {
+                    /*String msg = getSms("msg_huy_not_exist");
+                    msg = msg.replace("{GOI}", pack.getPackageID());
+                    msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
+                    msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
+                    SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                    msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
+                    sendSMS(msisdn, "9193", msg, smsID);
+                    respone = "2|HUY_KHONG_THANH CONG_DO_THUE_BAO_CHUA_DANG_KY";*/
+                    rs.setReturnCode("1");
+                    rs.setReturnDesc("CO THE DANG KY GOI CUOC");
+                    return rs;
+                }
+
+            } catch (Exception e) {
+                //service chua co,DK moi 
+                /*String msg = getSms("msg_huy_not_exist");
+                msg = msg.replace("{GOI}", pack.getPackageID());
+                msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
+                msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
+                SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                sendSMS(msisdn, "9193", msg, smsID);
+                respone = "0|HUY_KHONG_THANH_CONG_XIN_VUI_LONG_THU_LAI_SAU";*/
+                rs.setReturnCode("2");
+                rs.setReturnDesc("LOI HE THONG");
+                return rs;
+            }
+        } catch (Exception e) {
+            rs.setReturnCode("2");
+            rs.setReturnDesc("LOI HE THONG");
+            return rs;
+        }
+    }
+    
 
     /**
      * Hàm kiểm tra thông tin thuê bao
@@ -748,7 +859,28 @@ public class ServiceProcess {
             return null;
         }
     }
-
+    
+    /**
+     * Get thong tin thue bao
+     * @param msisdn
+     * @return 
+     */
+    public Service getService(String msisdn) {
+        try {
+            Service service = serviceDao.getServiceByPhone(msisdn);  
+            return service;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    public vn.ctnet.entity.Package getPackage(String PackageId) {
+        try {
+           return packCtl.getPackageByID(PackageId);
+        }catch(Exception e) {
+            return null;
+        }
+    }
     /**
      * Hàm gửi thông tin hướng dẫn cho người dùng
      *

@@ -8,9 +8,18 @@
         <servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
+    <servlet>
+        <servlet-name>vasapi</servlet-name>
+        <servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
     <servlet-mapping>
         <servlet-name>CtnetVas</servlet-name>
         <url-pattern>/CtnetVas</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>vasapi</servlet-name>
+        <url-pattern>/vasapi</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

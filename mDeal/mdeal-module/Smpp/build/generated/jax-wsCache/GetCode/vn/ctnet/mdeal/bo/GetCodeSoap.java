@@ -25,8 +25,8 @@ public interface GetCodeSoap {
 
     /**
      * 
-     * @param id
      * @param phone
+     * @param id
      * @return
      *     returns java.lang.String
      */
