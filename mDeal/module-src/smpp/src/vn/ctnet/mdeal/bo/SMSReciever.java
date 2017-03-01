@@ -18,6 +18,9 @@ import vn.ctnet.dao.SmsMoDAO;
 import vn.ctnet.entity.SmsMo;
 import vn.ctnet.dao.PackageDAO;
 import charging.Charging;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
 
 /**
  *
@@ -294,17 +297,18 @@ public class SMSReciever {
      * @param name
      * @return 
      */
-    public String getSms(String name) {
-
+    public String getSms(String name) 
+    {
+        
         Properties prop = new Properties();
         InputStream input = null;
-
+        Reader reader = null;
         try {
             String path = "C:\\mdeal_config\\sms.properties";
             input = new FileInputStream(new File(path));
-
+            reader = new InputStreamReader(input,Charset.forName("UTF-8"));
             // load a properties file
-            prop.load(input);
+            prop.load(reader);
             return prop.getProperty(name);
 
         } catch (IOException ex) {
@@ -314,6 +318,7 @@ public class SMSReciever {
             if (input != null) {
                 try {
                     input.close();
+                    reader.close();
                 } catch (IOException e) {
                 }
             }

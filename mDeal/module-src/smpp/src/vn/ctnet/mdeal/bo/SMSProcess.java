@@ -10,8 +10,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.math.BigInteger;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -729,16 +732,16 @@ public class SMSProcess {
      */
     public String getSms(String name) 
     {
-
+        
         Properties prop = new Properties();
         InputStream input = null;
-
+        Reader reader = null;
         try {
             String path = "C:\\mdeal_config\\sms.properties";
             input = new FileInputStream(new File(path));
-
+            reader = new InputStreamReader(input,Charset.forName("UTF-8"));
             // load a properties file
-            prop.load(input);
+            prop.load(reader);
             return prop.getProperty(name);
 
         } catch (IOException ex) {
@@ -748,6 +751,7 @@ public class SMSProcess {
             if (input != null) {
                 try {
                     input.close();
+                    reader.close();
                 } catch (IOException e) {
                 }
             }
@@ -761,6 +765,141 @@ public class SMSProcess {
      * @param smsID 
      */
     public void QueueCancel(String msisdn, String pkg, long smsID)
+    {
+        int confirmExpAfterMinute = Integer.parseInt(getValue("confirm_exp_after_minute"));
+        vn.ctnet.entity.Package pack;
+        try 
+        {
+            //lấy thông tin gói cước
+            pack = packCtl.getPackageByID(pkg);
+            
+            /*
+            Nếu thông tin gói cước không tồn tại, báo hủy không thành công cho người dùng
+            */
+            if (pack == null || pack.getPackageID() == null) {
+                String msg = getSms("msg_wrong");
+                sendSMS(msisdn, "9193", msg, smsID);
+                return;
+            }
+            
+            /**
+             * Nếu gói cước tồn tại, xử lý gởi xác nhận hủy
+             */
+            try 
+            {
+                Date d = new Date();
+                //Lấy thông tin thuê bao
+                vn.ctnet.entity.Service service = serviceDao.getServiceByPhone(msisdn);
+                
+                /*
+                Nếu thuê bao đang hoạt động tương ứng với gói cước được hủy,
+                tiến hành đưa vào danh sách queue
+                */
+                if ( //huy dich vu khi dich vu dang hoat dong
+                        (d.before(service.getExpDate()) //con han su dung
+                        && (!service.getStatus().equals("0")) //trang thai dang kich hoat
+                        && service.getPackageID().equals(pack.getPackageID()) //goi cuoc co ton tai
+                        )
+                        || ((service.getStatus().equals("4")) //trang thai dang retry
+                        && service.getPackageID().equals(pack.getPackageID())) //goi cuoc co ton tai
+                        ) {
+                    /*
+                    Đưa vào danh sách queue
+                    */
+                 
+                    try {
+                        QueueRequest queueRequest = new QueueRequest();
+                        queueRequest.setAction("UNREGISTER");
+                        queueRequest.setCreateDate(new Timestamp(new Date().getTime()));
+                        queueRequest.setExpDate(new Timestamp(vn.ctnet.mdeal.config.Utils.addMinute(confirmExpAfterMinute).getTime()));
+                        queueRequest.setPhone(msisdn);
+                        queueRequest.setStatus(false);
+                        
+                        QueueDAO.insert(queueRequest);
+                        /*
+                        Gởi thông báo hủy thành công
+                        */
+                        String msg = getSms("msg_confirm_unregister");
+                        msg = msg.replace("{GOI}", pack.getPackageID());
+                        msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
+                        msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
+                        SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                        msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
+                        msg = msg.replace("{PHUT}", confirmExpAfterMinute+"");
+                        sendSMS(msisdn, "9193", msg, smsID);
+                        return;
+                    } 
+                    catch(Exception e) 
+                    {
+                         String msg = getSms("msg_err_sys");
+                         sendSMS(msisdn, "9193", msg, smsID);
+                    
+                    }
+                    
+                }
+                /*
+                Nếu gói cước tồn tại nhưng đã hết hạn sử dụng, hoặc không tương ứng với gói cước được hủy
+                */
+                else 
+                {
+                    /*
+                    Gởi MT thông báo hủy gói cước không tồn tại
+                    */
+                    String msg = getSms("msg_huy_not_exist");
+                    msg = msg.replace("{GOI}", pack.getPackageID());
+                    msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
+                    msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
+                    SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                    msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
+                    sendSMS(msisdn, "9193", msg, smsID);
+                    return;
+                }
+
+            }
+            //Nếu thuê bao không tồn tại
+            catch (Exception e) 
+            {
+                /*
+                 Khởi tạo thông tin, thêm mới người dùng
+                 */
+                try {
+                    System.out.println("Tao moi profile");
+                    addNewProfile(msisdn);
+                } catch (Exception ex) {
+                    System.out.println("Profile da ton tai");
+                }
+                
+               /*
+                Gởi MT thông báo hủy gói cước không tồn tại
+                */
+                String msg = getSms("msg_huy_not_exist");
+                msg = msg.replace("{GOI}", pack.getPackageID());
+                msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
+                msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
+                sendSMS(msisdn, "9193", msg, smsID);
+                
+                
+            }
+        } catch (Exception e) {
+            /*
+            Gởi MT thông báo hủy không thành công
+            */
+            e.printStackTrace();
+            String msg = getSms("msg_huy_fail");
+            msg = msg.replace("{GOI}", pkg);
+            sendSMS(msisdn, "9193", msg, smsID);
+            
+        }
+
+    }
+    
+    /**
+     * Insert unregister request to queue
+     * @param msisdn
+     * @param pkg
+     * @param smsID 
+     */
+    public void QueueRegister(String msisdn, String pkg, long smsID)
     {
         int confirmExpAfterMinute = Integer.parseInt(getValue("confirm_exp_after_minute"));
         vn.ctnet.entity.Package pack;

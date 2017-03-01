@@ -346,6 +346,7 @@ public class ServiceProcess {
         ReturnRegister rs = new ReturnRegister();
         try {//try level 1
             rs = DoCharging(msisdn, packageID, smsID, chanel, chargin, username);
+            System.out.println("Result: "+rs.getChargingResult()+"|Package: "+rs.getPackageId()+"|ReturnCode: "+rs.getReturnCode()+"|Desc: "+rs.getReturnDesc()+"|Cycle: "+rs.getCycle()+"|Price: "+rs.getPrice());
             switch(rs.getReturnCode()) {
                 case "-1":
                     addNewProfile(msisdn);
@@ -434,7 +435,7 @@ public class ServiceProcess {
                 packageID = "D1";
             }
             pack = packCtl.getPackageByID(packageID);
-            return DoChargingCustom(msisdn, packageID,(int) pack.getPrice(), (int)pack.getNumOfDate(),1, smsID, chanel, chargin, username);
+            return DoChargingCustom(msisdn, pack.getPackageID(),(int) pack.getPrice(), (int)pack.getNumOfDate(),1, smsID, chanel, chargin, username);
         }catch(Exception e) {
             result.setReturnCode("0");
             result.setReturnDesc("DANG KY KHONG THANH CONG");
@@ -455,14 +456,26 @@ public class ServiceProcess {
             pack = packCtl.getPackageByID(packageID);
             Date d = new Date();
             vn.ctnet.entity.Service service = serviceDao.getServiceByPhone(msisdn);
-            if(service!=null) {
+            if(service!=null && !"".equals(service.getPackageID()) && service.getPackageID()!=null) {
+                System.out.println("Co service: "+service.getPackageID()+"|"+service.getPhone());
                 if (d.before(service.getExpDate()) && (!service.getStatus().equals("0")) && (!service.getStatus().equals("4"))) {
+                    System.out.println("Service con han su dung");
                     result.setReturnCode("2");
                     result.setReturnDesc("GOI CUOC DA TON TAI");
+                    if(username.equals("apimdeal")) {
+                    String msg = getSms("msg_sv_exist");
+                        msg = msg.replace("{GOI}", service.getPackageID());
+                        msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
+                        msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
+                        SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                        msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
+                        sendSMS(msisdn, "mDeal", msg, smsID);
+                    }
                     return result;
                 }
             //try level 3
                 try {
+                    System.out.println("Tru tien KH");
                     //login charing tru tien
                     String rs = chargin.debit(msisdn, (long)price, "049193", msisdn, vn.ctnet.mdeal.config.Utils.getCategoryId(pack.getPackageID(), 10), vn.ctnet.mdeal.config.Utils.getCategoryId(pack.getPackageID(), 6), 272);
                     Cdr cdr = new Cdr();
@@ -477,6 +490,7 @@ public class ServiceProcess {
                     cdr.setDebitTime(new Date());
                     cdr.setIsPushed(false);
                     if ("CPS-0000".equals(rs)) {
+                        System.out.println("Tru tien thanh cong");
                         //tru tien thanh cong
                         service.setExpDate(new Timestamp(vn.ctnet.mdeal.config.Utils.adddays(day*cycle).getTime()));
                         service.setChannel(chanel);
@@ -486,6 +500,19 @@ public class ServiceProcess {
                         service.setModifiedDate(new Timestamp(new Date().getTime()));
                         service.setUserModified(username);
                         SimpleDateFormat format = new SimpleDateFormat("ddMMyyyy");
+                        if(username.equals("apimdeal")) {
+                        /*
+                                 Gởi tin nhắn báo đăng ký thành công về cho thuê bao
+                                 */
+                                String msg = getSms("msg_dk_ok");
+                                msg = msg.replace("{GOI}", pack.getPackageID());
+                                msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
+                                msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
+                                SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                                msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
+                                String status = "PRE";
+                                sendSMS(msisdn, "mDeal", msg, smsID, status);
+                        }
                         
                         result.setReturnCode("1");
                         result.setReturnDesc("DANG KY THANH CONG");
@@ -495,6 +522,7 @@ public class ServiceProcess {
                         
                         cdr.setStatus(1);
                     } else if ("CPS-1001".equals(rs)) {
+                        System.out.println("Tru tien khong thanh cong, KH khong du tien");
                         cdr.setStatus(0);
 
                         service.setExpDate(new Timestamp(new Date().getTime()));
@@ -509,20 +537,57 @@ public class ServiceProcess {
                         result.setReturnCode("3");
                         result.setReturnDesc("THUE BAO KHONG DU TIEN");
                         result.setChargingResult(rs);
+                        if(username.equals("apimdeal")) {
+                            /*
+                                 Gởi tin nhắn báo đăng ký không thành công về cho thuê bao
+                                 */
+                                String msg = getSms("msg_dk_fail");
+                                msg = msg.replace("{GOI}", pack.getPackageID());
+                                msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
+                                msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
+                                SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                                msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
+                                sendSMS(msisdn, "9193", msg, smsID);
+                        }
                         
                     } else if ("CPS-1002".equals(rs) || "CPS-1003".equals(rs) || "CPS-1004".equals(rs)) {
+                        System.out.println("KH bi khoa thue bao");
                         cdr.setStatus(0);
                         
                         result.setReturnCode("0");
                         result.setReturnDesc("DANG KY KHONG THANH CONG");
                         result.setChargingResult(rs);
+                        if(username.equals("apimdeal")) {
+                        /*
+                                 Gởi tin nhắn thông báo đăng ký không thành công về cho khách hàng
+                                 */
+                                String msg = getSms("msg_dk_fail");
+                                msg = msg.replace("{GOI}", pack.getPackageID());
+                                msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
+                                msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
+                                SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                                msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
+                                sendSMS(msisdn, "9193", msg, smsID);
+                        }
                         
                     } else {
+                        System.out.println("Loi khac khong biet: "+rs);
                         cdr.setStatus(0);
-                        
                         result.setReturnCode("0");
                         result.setReturnDesc("LOI KHONG THE TRU TIEN");
                         result.setChargingResult(rs);
+                        if(username.equals("apimdeal")) {
+                            /*
+                            Gởi tin nhắn báo lỗi hệ thống về cho thuê bao
+                            */
+                           String msg = getSms("msg_err_sys");
+                           msg = msg.replace("{GOI}", pack.getPackageID());
+                           msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
+                           msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
+                           SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                           msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
+                           sendSMS(msisdn, "9193", msg, smsID);
+                        }
                     }
 
                     try {
@@ -530,24 +595,31 @@ public class ServiceProcess {
                         cdrCtrl.insert(cdr);
                         serviceDao.update(service);
                     } catch (Exception e) {
+                        System.out.println("update service "+e.getMessage());
                         result.setReturnCode("0");
                         result.setReturnDesc(e.getMessage());
                         result.setChargingResult(rs);
                     }
+                    return result;
                     //catch level 3
                 } catch (Exception e) {
+                    System.out.println("Tru tien: "+e.getMessage());
                     result.setReturnCode("0");
                     result.setReturnDesc(e.getMessage());
+                    return result;
                 }
             } else {
+                System.out.println("Service khong ton tai return -1");
                 result.setReturnCode("-1");
                 result.setReturnDesc("THUE BAO CHUA TON TAI TREN HE THONG");
+                return result;
             }   
         } catch (Exception e) {
+            System.out.println("get service: "+e.getMessage());
             result.setReturnCode("0");
             result.setReturnDesc(e.getMessage());
+            return result;
         }
-        return result;
     }
     
     public boolean AddService(String msisdn, String channel, String username, String packageId) {
@@ -566,7 +638,6 @@ public class ServiceProcess {
             service.setStatus("0");
             service.setIsPaid(0);
             service.setRegisterChannel(channel);
-            service.setModifiedDate(new Timestamp(new Date().getTime()));
             service.setNote("DK_VIA_"+channel);
             service.setUserModified(username);
             //Cập nhật thông tin thuê bao

@@ -6,6 +6,7 @@
 package vn.ctnet.mdeal;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Date;
 import org.jsmpp.InvalidResponseException;
 import org.jsmpp.PDUException;
@@ -38,20 +39,35 @@ public class Process {
 
         String messageId = null;
         try {
-            messageId = session.submitShortMessage("CMT",
-                    TypeOfNumber.ALPHANUMERIC, NumberingPlanIndicator.UNKNOWN,
-                    sendFrom, TypeOfNumber.UNKNOWN,
-                    NumberingPlanIndicator.UNKNOWN, phone,
-                    new ESMClass(), (byte) 0, (byte) 1, timeFormatter
-                    .format(new Date()), null, new RegisteredDelivery(
-                            SMSCDeliveryReceipt.DEFAULT), (byte) 0,
-                    new GeneralDataCoding(false, true, MessageClass.CLASS1,
-                            Alphabet.ALPHA_DEFAULT), (byte) 0, message
-                    .getBytes(), sarMsgRefNum, sarSegmentSeqnum,
+            
+            GeneralDataCoding dataCoding = new GeneralDataCoding(false, true, MessageClass.CLASS1, Alphabet.ALPHA_UCS2);
+            byte[] textByte = message.getBytes("UTF-16BE");
+            System.out.println(message);
+            messageId = session.submitShortMessage(
+                    "CMT",
+                    TypeOfNumber.NATIONAL, 
+                    NumberingPlanIndicator.UNKNOWN,
+                    sendFrom, 
+                    TypeOfNumber.NATIONAL,
+                    NumberingPlanIndicator.UNKNOWN, 
+                    phone,
+                    new ESMClass(), 
+                    (byte) 0, 
+                    (byte) 1, 
+                    null, 
+                    null, 
+                    new RegisteredDelivery(SMSCDeliveryReceipt.SUCCESS_FAILURE),
+                    (byte) 0,
+                    dataCoding, 
+                    (byte) 0, 
+                    textByte, 
+                    sarMsgRefNum, 
+                    sarSegmentSeqnum,
                     sarTotalSegments);
 
         } catch (PDUException e) {
             // Invalid PDU parameter
+            System.out.println("Loi dinh menh");
             System.err.println("Invalid PDU parameter");
         } catch (ResponseTimeoutException e) {
             // Response timeout

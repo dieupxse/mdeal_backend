@@ -118,7 +118,7 @@ public class RewriteSentMessage extends Thread {
                                             BindType.BIND_TRX,
                                             user,
                                             pass,
-                                            "",
+                                            "sp",
                                             TypeOfNumber.UNKNOWN,
                                             NumberingPlanIndicator.UNKNOWN,
                                             addressRange
@@ -141,11 +141,12 @@ public class RewriteSentMessage extends Thread {
                                                 BindType.BIND_TRX,
                                                 user,
                                                 pass,
-                                                "",
+                                                "sp",
                                                 TypeOfNumber.UNKNOWN,
                                                 NumberingPlanIndicator.UNKNOWN,
                                                 addressRange
                                         ), 3000);
+                                
                                 System.out.println("Connect SMPP Server success ...!");
                             } catch (IOException ex) {
                                 System.out.println("Error: " + ex.getMessage() + ex.getStackTrace());
@@ -219,7 +220,7 @@ public class RewriteSentMessage extends Thread {
                                         BindType.BIND_TRX,
                                         user,
                                         pass,
-                                        "",
+                                        "sp",
                                         TypeOfNumber.UNKNOWN,
                                         NumberingPlanIndicator.UNKNOWN,
                                         addressRange
@@ -242,7 +243,7 @@ public class RewriteSentMessage extends Thread {
                                             BindType.BIND_TRX,
                                             user,
                                             pass,
-                                            "",
+                                            "sp",
                                             TypeOfNumber.UNKNOWN,
                                             NumberingPlanIndicator.UNKNOWN,
                                             addressRange
@@ -374,7 +375,7 @@ public class RewriteSentMessage extends Thread {
 
             // load a properties file
             prop.load(input);
-            return prop.getProperty(name);
+            return new String(prop.getProperty(name).getBytes("UTF-8"));
 
         } catch (IOException ex) {
             System.out.println(ex.getMessage());

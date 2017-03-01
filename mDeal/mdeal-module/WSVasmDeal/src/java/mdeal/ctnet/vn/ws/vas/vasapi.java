@@ -56,7 +56,7 @@ public class vasapi {
         log.setIp(getIP());
         log.setMethod("register");
         log.setUrl(url);
-        log.setParams("msisdn="+msisdn+"&packagecode="+packagecode+"&username="+username+"&password="+password);
+        log.setParams("msisdn="+msisdn+"&packagecode="+packagecode+"&username="+username+"&password="+password+"&channel="+channel+"&info="+info);
         log.setUserName(username);
         log.setChannel(channel);
         try {
@@ -78,6 +78,7 @@ public class vasapi {
  
             ServiceProcess sm = new ServiceProcess();
             ReturnRegister rs = sm.register_direct(Helper.initPhoneNumber(msisdn, 3), packagecode, 0, ("".equals(channel) || channel==null ? "MSOCIAL": channel),Cog.charging,username);
+            System.out.println(rs.getChargingResult()+"|"+rs.getPackageId()+"|"+rs.getReturnCode()+"|"+rs.getReturnDesc());
             try {
                 log.setResult(rs.getReturnCode()+"|"+rs.getReturnDesc()+"|"+rs.getPackageId()+"|"+rs.getPrice());
                 logDao.insert(log);

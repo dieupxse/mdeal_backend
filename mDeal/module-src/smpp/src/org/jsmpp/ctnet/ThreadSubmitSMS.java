@@ -5,6 +5,7 @@
  */
 package org.jsmpp.ctnet;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Random;
 import org.jsmpp.bean.OptionalParameter;
 import org.jsmpp.bean.OptionalParameters;
@@ -29,7 +30,7 @@ public class ThreadSubmitSMS extends Thread {
      * @param msisdn
      * @param brandName
      */
-    ThreadSubmitSMS(SMPPSession session, String message, String msisdn, String brandName) {
+    ThreadSubmitSMS(SMPPSession session, String message, String msisdn, String brandName) throws UnsupportedEncodingException {
         this.session = session;
         this.message = message;
         this.msisdn = msisdn;
@@ -88,11 +89,11 @@ public class ThreadSubmitSMS extends Thread {
     public String getMessageWithSegment(String msg, int seg) {
 
         String rs = "";
-        int partNum = (int) Math.ceil((double) msg.length() / (double) 150);
+        int partNum = (int) Math.ceil((double) msg.length() / (double) 60);
         for (int i = 1; i <= partNum; i++) {
             if (i == seg) {
-                rs = msg.substring((seg - 1) * 150,
-                        (seg * 150 > msg.length() ? msg.length() : seg * 150));
+                rs = msg.substring((seg - 1) * 60,
+                        (seg * 60 > msg.length() ? msg.length() : seg * 60));
             }
         }
         return rs;
@@ -105,6 +106,6 @@ public class ThreadSubmitSMS extends Thread {
      */
     public int countSegment(int len) {
 
-        return (int) Math.ceil((double) len / (double) 150);
+        return (int) Math.ceil((double) len / (double) 60);
     }
 }
