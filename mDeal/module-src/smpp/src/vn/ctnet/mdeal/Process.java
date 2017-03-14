@@ -42,7 +42,6 @@ public class Process {
             
             GeneralDataCoding dataCoding = new GeneralDataCoding(false, true, MessageClass.CLASS1, Alphabet.ALPHA_UCS2);
             byte[] textByte = message.getBytes("UTF-16BE");
-            System.out.println(message);
             messageId = session.submitShortMessage(
                     "CMT",
                     TypeOfNumber.NATIONAL, 

@@ -89,11 +89,11 @@ public class ThreadSubmitSMS extends Thread {
     public String getMessageWithSegment(String msg, int seg) {
 
         String rs = "";
-        int partNum = (int) Math.ceil((double) msg.length() / (double) 60);
+        int partNum = (int) Math.ceil((double) msg.length() / (double) 65);
         for (int i = 1; i <= partNum; i++) {
             if (i == seg) {
-                rs = msg.substring((seg - 1) * 60,
-                        (seg * 60 > msg.length() ? msg.length() : seg * 60));
+                rs = msg.substring((seg - 1) * 65,
+                        (seg * 65 > msg.length() ? msg.length() : seg * 65));
             }
         }
         return rs;
@@ -106,6 +106,6 @@ public class ThreadSubmitSMS extends Thread {
      */
     public int countSegment(int len) {
 
-        return (int) Math.ceil((double) len / (double) 60);
+        return (int) Math.ceil((double) len / (double) 65);
     }
 }

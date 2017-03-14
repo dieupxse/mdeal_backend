@@ -10,7 +10,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -347,17 +350,18 @@ public class CustomServiceProcess {
     /*
     Hàm get nội dung bản tin Mt
     */
-    public String getSms(String name) {
-
+   public String getSms(String name) 
+    {
+        
         Properties prop = new Properties();
         InputStream input = null;
-
+        Reader reader = null;
         try {
             String path = "C:\\mdeal_config\\sms.properties";
             input = new FileInputStream(new File(path));
-
+            reader = new InputStreamReader(input,Charset.forName("UTF-8"));
             // load a properties file
-            prop.load(input);
+            prop.load(reader);
             return prop.getProperty(name);
 
         } catch (IOException ex) {
@@ -367,6 +371,7 @@ public class CustomServiceProcess {
             if (input != null) {
                 try {
                     input.close();
+                    reader.close();
                 } catch (IOException e) {
                 }
             }
