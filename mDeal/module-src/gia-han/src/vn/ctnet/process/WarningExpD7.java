@@ -53,16 +53,14 @@ public class WarningExpD7 extends Thread{
                     vn.ctnet.entity.Package pkg = null;
                     try {
                         pkg = pkDAO.getPackageByID(sv.getPackageID());
-                        if(enable_mt_renew!=null && enable_mt_renew.equals("1")) {
-                            String msg = vn.ctnet.confi.Ultility.getSms("msg_gh_ok");
-                            msg = msg.replace("{GOI}", sv.getPackageID());
-                            msg = msg.replace("{NGAY}", pkg.getNumOfDate() + "");
-                            msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pkg.getPrice())).replace(',', '.'));
-                            SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
-                            msg = msg.replace("{DATE}", fm.format(sv.getExpDate()));
-                            SendSMS sendSMS = new SendSMS(sv.getPhone(),"mDeal",msg);
-                            sendSMS.start();
-                        }
+                        String msg = vn.ctnet.confi.Ultility.getSms("msg_gh_ok");
+                        msg = msg.replace("{GOI}", sv.getPackageID());
+                        msg = msg.replace("{NGAY}", pkg.getNumOfDate() + "");
+                        msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pkg.getPrice())).replace(',', '.'));
+                        SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                        msg = msg.replace("{DATE}", fm.format(sv.getExpDate()));
+                        SendSMS sendSMS = new SendSMS(sv.getPhone(),"mDeal",msg);
+                        sendSMS.start();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

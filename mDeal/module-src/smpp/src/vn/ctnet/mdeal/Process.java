@@ -44,10 +44,10 @@ public class Process {
             byte[] textByte = message.getBytes("UTF-16BE");
             messageId = session.submitShortMessage(
                     "CMT",
-                    TypeOfNumber.NATIONAL, 
+                    TypeOfNumber.ALPHANUMERIC, 
                     NumberingPlanIndicator.UNKNOWN,
                     sendFrom, 
-                    TypeOfNumber.NATIONAL,
+                    TypeOfNumber.UNKNOWN,
                     NumberingPlanIndicator.UNKNOWN, 
                     phone,
                     new ESMClass(), 

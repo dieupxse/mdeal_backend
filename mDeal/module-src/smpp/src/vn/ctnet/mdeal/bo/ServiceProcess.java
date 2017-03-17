@@ -24,9 +24,11 @@ import vn.ctnet.dao.CdrDAO;
 import vn.ctnet.dao.PackageDAO;
 import vn.ctnet.dao.ProfileDAO;
 import vn.ctnet.dao.ServiceDAO;
+import vn.ctnet.dao.SmsContentDAO;
 import vn.ctnet.entity.Cdr;
 import vn.ctnet.entity.Profile;
 import vn.ctnet.entity.Service;
+import vn.ctnet.entity.SmsContent;
 import vn.ctnet.mdeal.entity.ReturnRegister;
 /**
  *
@@ -1037,6 +1039,13 @@ public class ServiceProcess {
         Properties prop = new Properties();
         InputStream input = null;
         Reader reader = null;
+        SmsContentDAO smsDao = new SmsContentDAO();
+        try {
+        SmsContent sc = smsDao.getSms(name);
+        if(sc!=null && !"".equals(sc.getContent())) return sc.getContent();
+        } catch(Exception e) {
+        
+        }
         try {
             String path = "C:\\mdeal_config\\sms.properties";
             input = new FileInputStream(new File(path));

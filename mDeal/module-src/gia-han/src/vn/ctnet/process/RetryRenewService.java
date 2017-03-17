@@ -61,16 +61,14 @@ public class RetryRenewService extends Thread {
                             
                             //Gui tin bao huy thanh cong 
                             
-                            if (enable_mt_renew_fail != null && enable_mt_renew_fail.equals("1")) {
-                                String msg = vn.ctnet.confi.Ultility.getSms("msg_gh_fail");
-                                msg = msg.replace("{GOI}", pkg.getPackageID());
-                                msg = msg.replace("{NGAY}", pkg.getNumOfDate() + "");
-                                msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pkg.getPrice())).replace(',', '.'));
-                                SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
-                                msg = msg.replace("{DATE}", fm.format(sv.getExpDate()));
-                                SendSMS sendSMS = new SendSMS(sv.getPhone(), "9193", msg);
-                                sendSMS.start();
-                            }
+                            String msg = vn.ctnet.confi.Ultility.getSms("msg_gh_fail");
+                            msg = msg.replace("{GOI}", pkg.getPackageID());
+                            msg = msg.replace("{NGAY}", pkg.getNumOfDate() + "");
+                            msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pkg.getPrice())).replace(',', '.'));
+                            SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                            msg = msg.replace("{DATE}", fm.format(sv.getExpDate()));
+                            SendSMS sendSMS = new SendSMS(sv.getPhone(), "9193", msg);
+                            sendSMS.start();
                             
                         } else {
                             //con so lan retry tiep tuc thuc hien tru tien
@@ -105,16 +103,14 @@ public class RetryRenewService extends Thread {
                                     sv.setModifiedDate(new Timestamp(new Date().getTime()));
                                     sv.setStartDate(new Timestamp(new Date().getTime()));
                                     System.out.println("Ngay con lai: " + sv.getRemainAdjournDate());
-                                    if (enable_mt_renew != null && enable_mt_renew.equals("1")) {
-                                        String msg = vn.ctnet.confi.Ultility.getSms("msg_gh_ok");
-                                        msg = msg.replace("{GOI}", pkg.getPackageID());
-                                        msg = msg.replace("{NGAY}", pkg.getNumOfDate() + "");
-                                        msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pkg.getPrice())).replace(',', '.'));
-                                        SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
-                                        msg = msg.replace("{DATE}", fm.format(sv.getExpDate()));
-                                        SendSMS sendSMS = new SendSMS(sv.getPhone(), "mDeal", msg);
-                                        sendSMS.start();
-                                    }
+                                    String msg = vn.ctnet.confi.Ultility.getSms("msg_gh_ok");
+                                    msg = msg.replace("{GOI}", pkg.getPackageID());
+                                    msg = msg.replace("{NGAY}", pkg.getNumOfDate() + "");
+                                    msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pkg.getPrice())).replace(',', '.'));
+                                    SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                                    msg = msg.replace("{DATE}", fm.format(sv.getExpDate()));
+                                    SendSMS sendSMS = new SendSMS(sv.getPhone(), "mDeal", msg);
+                                    sendSMS.start();
 
                                 } //Thue bao khong kha dung
                                 else if (rsdb.equals("CPS-1004") || rsdb.equals("CPS-1007") || rsdb.startsWith("CPE")) {

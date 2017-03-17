@@ -21,6 +21,8 @@ import charging.Charging;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import vn.ctnet.dao.SmsContentDAO;
+import vn.ctnet.entity.SmsContent;
 
 /**
  *
@@ -303,6 +305,13 @@ public class SMSReciever {
         Properties prop = new Properties();
         InputStream input = null;
         Reader reader = null;
+        SmsContentDAO smsDao = new SmsContentDAO();
+        try {
+            SmsContent sc = smsDao.getSms(name);
+            if(sc!=null && !"".equals(sc.getContent())) return sc.getContent();
+        } catch(Exception e) {
+        
+        }
         try {
             String path = "C:\\mdeal_config\\sms.properties";
             input = new FileInputStream(new File(path));

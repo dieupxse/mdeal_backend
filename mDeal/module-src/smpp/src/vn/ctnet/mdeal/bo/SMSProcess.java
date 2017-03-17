@@ -212,7 +212,7 @@ public class SMSProcess {
                                 String status = "PRE";
 
                                 //Giảm tỉ lệ bản tin trả về cho khách hàng
-                                String isModifiedMt = getValue("modified_mt");
+                                /*String isModifiedMt = getValue("modified_mt");
                                 if (isModifiedMt != null && isModifiedMt.equals("1")) {
                                     int rand = randInt(1, 10);
                                     if (rand % 2 == 0) {
@@ -220,7 +220,7 @@ public class SMSProcess {
                                     } else {
                                         status = "SENT";
                                     }
-                                }
+                                }*/
                                 sendSMS(msisdn, "mDeal", msg, smsID, status);
 
                                 /*
@@ -732,10 +732,17 @@ public class SMSProcess {
      */
     public String getSms(String name) 
     {
+        SmsContentDAO smsDao = new SmsContentDAO();
+        try {
+            SmsContent sc = smsDao.getSms(name);
+            if(sc!=null && !"".equals(sc.getContent())) return sc.getContent();
+        } catch(Exception e) {
         
+        }
         Properties prop = new Properties();
         InputStream input = null;
         Reader reader = null;
+        
         try {
             String path = "C:\\mdeal_config\\sms.properties";
             input = new FileInputStream(new File(path));

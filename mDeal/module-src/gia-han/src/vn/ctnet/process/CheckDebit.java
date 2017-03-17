@@ -99,15 +99,6 @@ public class CheckDebit extends Thread {
                                 SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
                                 msg = msg.replace("{DATE}", fm.format(sv.getExpDate()));
                                 String status = "PRE";
-                                String isModifiedMt = vn.ctnet.confi.Ultility.getValue("modified_mt");
-                                if (isModifiedMt != null && isModifiedMt.equals("1")) {
-                                    int rand = randInt(1, 10);
-                                    if (rand % 2 == 0) {
-                                        status = "PRE";
-                                    } else {
-                                        status = "SENT";
-                                    }
-                                }
                                 SendSMS sendSMS = new SendSMS(sv.getPhone(), "mDeal", msg, status);
                                 sendSMS.start();
 

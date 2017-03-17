@@ -12,6 +12,8 @@ import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
+import vn.ctnet.dao.SmsContentDAO;
+import vn.ctnet.entity.SmsContent;
 
 /**
  *
@@ -43,6 +45,13 @@ public class Ultility {
         }
     }
     public static String getSms(String name) {
+        SmsContentDAO smsDao = new SmsContentDAO();
+        try {
+            SmsContent sc = smsDao.getSms(name);
+            if(sc!=null && !"".equals(sc.getContent())) return sc.getContent();
+        } catch(Exception e) {
+        
+        }
         Properties prop = new Properties();
         InputStream input = null;
         try {

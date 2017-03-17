@@ -56,26 +56,15 @@ public class WarningExpFreeAccount extends Thread {
                     vn.ctnet.entity.Package pkg = null;
                     try {
                         pkg = pkDAO.getPackageByID(sv.getPackageID());
-                        if(enable_mt_exp_free!=null && enable_mt_exp_free.equals("1")) {
-                            String msg = vn.ctnet.confi.Ultility.getSms("msg_warning_free");
+                        String msg = vn.ctnet.confi.Ultility.getSms("msg_warning_free");
                             msg = msg.replace("{GOI}", sv.getPackageID());
                             msg = msg.replace("{NGAY}", pkg.getNumOfDate() + "");
                             msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pkg.getPrice())).replace(',', '.'));
                             SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
                             msg = msg.replace("{DATE}", fm.format(sv.getExpDate()));
                             String status = "PRE";
-                            String isModifiedMt = vn.ctnet.confi.Ultility.getValue("modified_mt_free_warning");
-                            if(isModifiedMt!=null && isModifiedMt.equals("1")) {
-                                int rand = randInt(1,10);
-                                if(rand%2==0) {
-                                    status = "PRE";
-                                } else {
-                                    status = "SENT";
-                                }
-                            }
                             SendSMS sendSMS = new SendSMS(sv.getPhone(),"mDeal",msg,status);
                             sendSMS.start();
-                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

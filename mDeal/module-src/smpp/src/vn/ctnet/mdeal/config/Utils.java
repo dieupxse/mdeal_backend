@@ -16,6 +16,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
+import vn.ctnet.dao.SmsContentDAO;
+import vn.ctnet.entity.SmsContent;
 
 /**
  *
@@ -104,7 +106,7 @@ public class Utils {
            return rs;
        }
       
-      public static String getValue(String name) {
+    public static String getValue(String name) {
 
         Properties prop = new Properties();
         InputStream input = null;
@@ -129,8 +131,14 @@ public class Utils {
             }
         }
     }
-       public static String getSms(String name) {
-
+    public static String getSms(String name) {
+        SmsContentDAO smsDao = new SmsContentDAO();
+        try {
+            SmsContent sc = smsDao.getSms(name);
+            if(sc!=null && !"".equals(sc.getContent())) return sc.getContent();
+        } catch(Exception e) {
+        
+        }
         Properties prop = new Properties();
         InputStream input = null;
 
