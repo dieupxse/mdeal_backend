@@ -150,7 +150,7 @@ public class SMSProcess {
             try {
                 //Lấy thông tin thuê bao qua số điện thoại
                 vn.ctnet.entity.Service service = serviceDao.getServiceByPhone(msisdn);
-
+                service.setIsAutoRenew(true);
                 //Nếu thông tin thuê bao đã tồn tại và còn hạn sử dụng, báo gói cước đã tồn tại về cho thuê bao
                 if (d.before(service.getExpDate()) && (!service.getStatus().equals("0")) && (!service.getStatus().equals("4"))) {
                     String msg = getSms("msg_sv_exist");
@@ -385,6 +385,7 @@ public class SMSProcess {
                     service.setRegisterChannel(chanel);
                     service.setModifiedDate(new Timestamp(new Date().getTime()));
                     service.setNote("DK_SMS");
+                    service.setIsAutoRenew(true);
                     //Cập nhật thông tin thuê bao
                     serviceDao.insert(service);
 

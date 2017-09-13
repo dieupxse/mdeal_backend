@@ -16,6 +16,7 @@ import vn.ctnet.entity.Reply;
 import vn.ctnet.entity.Service;
 import vn.ctnet.mdeal.bo.CustomServiceProcess;
 import vn.ctnet.mdeal.bo.ServiceProcess;
+import vn.ctnet.mdeal.entity.ReturnRegister;
 
 /**
  *
@@ -42,7 +43,7 @@ public class ChargingWs {
         OutputString output = new OutputString();
         try {
             ServiceProcess sm = new ServiceProcess();
-            String rs = sm.register(initPhoneNumber(msisdn, 3), packageCode, 0,channel,charging,user);
+            String rs = sm.register(initPhoneNumber(msisdn, 3), packageCode, 0,channel,charging,user,true);
             rs = rs.replace("|", ":");
             String message = rs.replace(":", "|");
             return output.register(rs.split(":")[0], message);
@@ -63,10 +64,8 @@ public class ChargingWs {
         OutputString output = new OutputString();
         try {
             ServiceProcess sm = new ServiceProcess();
-            String rs = sm.register_direct(initPhoneNumber(msisdn, 3), packageCode, 0,channel,charging,"");
-            rs = rs.replace("|", ":");
-            String message = rs.replace(":", "|");
-            return output.register(rs.split(":")[0], message);
+            ReturnRegister rs = sm.register_direct(initPhoneNumber(msisdn, 3), packageCode, 0,channel,charging,"",true);
+            return output.register(rs.getReturnCode(),rs.getReturnDesc());
         } catch (Exception e) {
             return output.register("0", "0|DANG_KY_KHONG_THANH_CONG_XIN_VUI_LONG_THU_LAI_SAU");
         } 

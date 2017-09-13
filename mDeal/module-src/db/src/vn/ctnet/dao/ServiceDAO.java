@@ -26,7 +26,7 @@ public class ServiceDAO {
     public boolean insert(Service sv) throws ClassNotFoundException, SQLException {
         Database DB = new Database();
         Connection conn = DB.connection();
-        String sql = "INSERT INTO SERVICE(PackageID,RegDate,StartDate,ExpDate,Channel,IsSynched,RegisterChannel,Status,AutoAdjourn,Retry,AdjournDate,RemainMoney,RemainAdjournDate,Description,ModifiedDate,isPaid,Phone,isPushMsg,userModified,Note) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO SERVICE(PackageID,RegDate,StartDate,ExpDate,Channel,IsSynched,RegisterChannel,Status,AutoAdjourn,Retry,AdjournDate,RemainMoney,RemainAdjournDate,Description,ModifiedDate,isPaid,Phone,isPushMsg,userModified,Note,IsAutoRenew) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         PreparedStatement pstm = conn.prepareStatement(sql);
         pstm.setString(1, sv.getPackageID() == null ? "D30" : sv.getPackageID());
         pstm.setString(2, sv.getRegDate() == null ? this.fm.format(new Date()) : this.fm.format(sv.getRegDate()));
@@ -48,6 +48,7 @@ public class ServiceDAO {
         pstm.setInt(18, sv.getIsPushMsg() == null ? 0 : sv.getIsPushMsg());
         pstm.setString(19, sv.getUserModified() == null ? "" : sv.getUserModified());
         pstm.setString(20, sv.getNote() == null ? "" : sv.getNote());
+        pstm.setBoolean(21, sv.isIsAutoRenew());
         try {
             boolean bl = pstm.executeUpdate() > 0;
             return bl;
@@ -70,7 +71,7 @@ public class ServiceDAO {
     public boolean update(Service sv) throws ClassNotFoundException, SQLException {
         Database DB = new Database();
         Connection conn = DB.connection();
-        String sql = "UPDATE SERVICE SET PackageID=?,RegDate=?,StartDate=?,ExpDate=?,Channel=?,IsSynched=?,RegisterChannel=?,Status=?,AutoAdjourn=?,Retry=?,AdjournDate=?,RemainMoney=?,RemainAdjournDate=?,Description=?,ModifiedDate=?,isPaid=?,Phone=? ,isPushMsg=? ,userModified=? ,Note = ? WHERE ServiceID = ?";
+        String sql = "UPDATE SERVICE SET PackageID=?,RegDate=?,StartDate=?,ExpDate=?,Channel=?,IsSynched=?,RegisterChannel=?,Status=?,AutoAdjourn=?,Retry=?,AdjournDate=?,RemainMoney=?,RemainAdjournDate=?,Description=?,ModifiedDate=?,isPaid=?,Phone=? ,isPushMsg=? ,userModified=? ,Note = ?, IsAutoRenew=? WHERE ServiceID = ?";
         PreparedStatement pstm = conn.prepareStatement(sql);
         pstm.setString(1, sv.getPackageID());
         pstm.setString(2, sv.getRegDate() == null ? this.fm.format(new Date()) : this.fm.format(sv.getRegDate()));
@@ -92,7 +93,8 @@ public class ServiceDAO {
         pstm.setInt(18, sv.getIsPushMsg() == null ? 0 : sv.getIsPushMsg());
         pstm.setString(19, sv.getUserModified() == null ? "" : sv.getUserModified());
         pstm.setString(20, sv.getNote() == null ? "" : sv.getNote());
-        pstm.setLong(21, sv.getServiceID());
+        pstm.setBoolean(21, sv.isIsAutoRenew());
+        pstm.setLong(22, sv.getServiceID());
         try {
             boolean bl = pstm.executeUpdate() > 0;
             return bl;
@@ -146,6 +148,8 @@ public class ServiceDAO {
                 sv.setIsPushMsg(rs.getInt("isPushMsg"));
                 sv.setUserModified(rs.getString("userModified"));
                 sv.setNote(rs.getString("Note"));
+                sv.setIsAutoRenew(rs.getBoolean("IsAutoRenew"));
+                
                 list.add(sv);
             }
         }
@@ -194,6 +198,7 @@ public class ServiceDAO {
                 sv.setIsPushMsg(rs.getInt("isPushMsg"));
                 sv.setUserModified(rs.getString("userModified"));
                 sv.setNote(rs.getString("Note"));
+                sv.setIsAutoRenew(rs.getBoolean("IsAutoRenew"));
                 list.add(sv);
             }
         }
@@ -214,7 +219,7 @@ public class ServiceDAO {
         ArrayList<Service> list = null;
         Database DB = new Database();
         Connection conn = DB.connection();
-        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE ExpDate <= GETDATE() and isPaid=1 and (Status ='1' or Status ='2' or Status ='3')");
+        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE ExpDate <= GETDATE() and isPaid=1 and (Status ='1' or Status ='2' or Status ='3') and IsAutoRenew=1");
         ResultSet rs = pstm.executeQuery();
         if (rs != null) {
             list = new ArrayList<Service>();
@@ -242,6 +247,58 @@ public class ServiceDAO {
                 sv.setIsPushMsg(rs.getInt("isPushMsg"));
                 sv.setUserModified(rs.getString("userModified"));
                 sv.setNote(rs.getString("Note"));
+                sv.setIsAutoRenew(rs.getBoolean("IsAutoRenew"));
+                
+                list.add(sv);
+            }
+        }
+        if (rs != null) {
+            rs.close();
+        }
+        if (pstm != null) {
+            pstm.close();
+        }
+        if (conn != null) {
+            conn.close();
+        }
+        return list;
+    }
+    
+    public ArrayList<Service> getCancelAccount() throws ClassNotFoundException, SQLException {
+        String sql;
+        ArrayList<Service> list = null;
+        Database DB = new Database();
+        Connection conn = DB.connection();
+        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE ExpDate <= GETDATE() and isPaid=1 and (Status ='1' or Status ='2' or Status ='3') and IsAutoRenew=0");
+        ResultSet rs = pstm.executeQuery();
+        if (rs != null) {
+            list = new ArrayList<Service>();
+            while (rs.next()) {
+                Service sv = new Service();
+                sv.setServiceID(rs.getLong("ServiceID"));
+                sv.setPackageID(rs.getString("PackageID"));
+                sv.setRegDate(rs.getTimestamp("RegDate"));
+                sv.setStartDate(rs.getTimestamp("StartDate"));
+                sv.setExpDate(rs.getTimestamp("ExpDate"));
+                sv.setAdjournDate(rs.getTimestamp("AdjournDate"));
+                sv.setAutoAdjourn(rs.getBoolean("AutoAdjourn"));
+                sv.setChannel(rs.getString("Channel"));
+                sv.setStatus(rs.getString("Status"));
+                sv.setDescription(rs.getString("Description"));
+                sv.setIsPaid(rs.getInt("isPaid"));
+                sv.setIsSynched(rs.getBoolean("IsSynched"));
+                sv.setModifiedDate(rs.getDate("ModifiedDate"));
+                sv.setPhone(rs.getString("Phone"));
+                sv.setRegisterChannel(rs.getString("RegisterChannel"));
+                sv.setRemainAdjournDate(rs.getInt("RemainAdjournDate"));
+                sv.setRemainMoney(rs.getDouble("RemainMoney"));
+                sv.setRetry(rs.getInt("Retry"));
+                sv.setSmsmoID(BigInteger.valueOf(rs.getLong("Sms_mo_ID")));
+                sv.setIsPushMsg(rs.getInt("isPushMsg"));
+                sv.setUserModified(rs.getString("userModified"));
+                sv.setNote(rs.getString("Note"));
+                sv.setIsAutoRenew(rs.getBoolean("IsAutoRenew"));
+                
                 list.add(sv);
             }
         }
@@ -290,6 +347,8 @@ public class ServiceDAO {
                 sv.setIsPushMsg(rs.getInt("isPushMsg"));
                 sv.setUserModified(rs.getString("userModified"));
                 sv.setNote(rs.getString("Note"));
+                sv.setIsAutoRenew(rs.getBoolean("IsAutoRenew"));
+                
                 list.add(sv);
             }
         }
@@ -338,6 +397,8 @@ public class ServiceDAO {
                 sv.setIsPushMsg(rs.getInt("isPushMsg"));
                 sv.setUserModified(rs.getString("userModified"));
                 sv.setNote(rs.getString("Note"));
+                sv.setIsAutoRenew(rs.getBoolean("IsAutoRenew"));
+                
                 list.add(sv);
             }
         }
@@ -386,6 +447,8 @@ public class ServiceDAO {
                 sv.setIsPushMsg(rs.getInt("isPushMsg"));
                 sv.setUserModified(rs.getString("userModified"));
                 sv.setNote(rs.getString("Note"));
+                sv.setIsAutoRenew(rs.getBoolean("IsAutoRenew"));
+                
                 list.add(sv);
             }
         }
@@ -434,6 +497,8 @@ public class ServiceDAO {
                 sv.setIsPushMsg(rs.getInt("isPushMsg"));
                 sv.setUserModified(rs.getString("userModified"));
                 sv.setNote(rs.getString("Note"));
+                sv.setIsAutoRenew(rs.getBoolean("IsAutoRenew"));
+                
                 list.add(sv);
             }
         }
@@ -454,7 +519,7 @@ public class ServiceDAO {
         ArrayList<Service> list = null;
         Database DB = new Database();
         Connection conn = DB.connection();
-        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE  isPaid=0 and Status ='2'");
+        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE  isPaid=0 and Status ='2' and IsAutoRenew=1");
         ResultSet rs = pstm.executeQuery();
         if (rs != null) {
             list = new ArrayList<Service>();
@@ -482,6 +547,8 @@ public class ServiceDAO {
                 sv.setIsPushMsg(rs.getInt("isPushMsg"));
                 sv.setUserModified(rs.getString("userModified"));
                 sv.setNote(rs.getString("Note"));
+                sv.setIsAutoRenew(rs.getBoolean("IsAutoRenew"));
+                
                 list.add(sv);
             }
         }
@@ -502,7 +569,7 @@ public class ServiceDAO {
         ArrayList<Service> list = null;
         Database DB = new Database();
         Connection conn = DB.connection();
-        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE (Status = '4' or Status ='5') and isPaid = 2 and AdjournDate <= GETDATE() and RemainMoney > 0");
+        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE (Status = '4' or Status ='5') and isPaid = 2 and AdjournDate <= GETDATE() and RemainMoney > 0 and IsAutoRenew=1");
         ResultSet rs = pstm.executeQuery();
         if (rs != null) {
             list = new ArrayList<Service>();
@@ -530,6 +597,8 @@ public class ServiceDAO {
                 sv.setIsPushMsg(rs.getInt("isPushMsg"));
                 sv.setUserModified(rs.getString("userModified"));
                 sv.setNote(rs.getString("Note"));
+                sv.setIsAutoRenew(rs.getBoolean("IsAutoRenew"));
+                
                 list.add(sv);
             }
         }
@@ -579,6 +648,8 @@ public class ServiceDAO {
                     sv.setIsPushMsg(rs.getInt("isPushMsg"));
                     sv.setUserModified(rs.getString("userModified"));
                     sv.setNote(rs.getString("Note"));
+                    sv.setIsAutoRenew(rs.getBoolean("IsAutoRenew"));
+                
                 }
                 conn.close();
                 pstm.close();

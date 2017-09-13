@@ -5,6 +5,7 @@
  */
 package vn.ctnet.ui;
 
+import vn.ctnet.process.CancelService;
 import vn.ctnet.process.CheckDebit;
 import vn.ctnet.process.CheckQueueRequestUnregister;
 import vn.ctnet.process.RenewService;
@@ -30,6 +31,9 @@ public class App {
         //thread retry gia han
         vn.ctnet.process.RetryRenewService retry = new RetryRenewService();
         retry.start();
+        //thread cancel
+        vn.ctnet.process.CancelService cancel = new CancelService();
+        cancel.start();
         //thread thuc hien tru tien
         vn.ctnet.process.CheckDebit debit = new CheckDebit();
         debit.start();

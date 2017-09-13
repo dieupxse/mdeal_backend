@@ -98,7 +98,7 @@ public class ServiceProcess {
      * @param chargin
      * @return
      */
-    public String register(String msisdn, String packageID, long smsID, String chanel, Charging chargin, String user) {
+    public String register(String msisdn, String packageID, long smsID, String chanel, Charging chargin, String user, boolean isAutoRenew) {
         String allownumber = getValue("allow_number");
         int free_day = Integer.parseInt(getValue("free_day"));
         if (allownumber != null && !"".equals(allownumber)) {
@@ -138,6 +138,7 @@ public class ServiceProcess {
             //kiem tra han su dung neu con thong bao ve cho nguoi dung
             try {
                 vn.ctnet.entity.Service service = serviceDao.getServiceByPhone(msisdn);
+                service.setIsAutoRenew(isAutoRenew);
                 //serviec co roi
                 if (d.before(service.getExpDate()) && (!service.getStatus().equals("0")) && (!service.getStatus().equals("4"))) {
                     //con han su dung
@@ -346,17 +347,17 @@ public class ServiceProcess {
      * @param username
      * @return
      */
-    public ReturnRegister register_direct(String msisdn, String packageID, long smsID, String chanel, Charging chargin,String username) {
+    public ReturnRegister register_direct(String msisdn, String packageID, long smsID, String chanel, Charging chargin,String username, boolean isAutoRenew) {
 
         ReturnRegister rs = new ReturnRegister();
         try {//try level 1
-            rs = DoCharging(msisdn, packageID, smsID, chanel, chargin, username);
+            rs = DoCharging(msisdn, packageID, smsID, chanel, chargin, username,isAutoRenew);
             System.out.println("Result: "+rs.getChargingResult()+"|Package: "+rs.getPackageId()+"|ReturnCode: "+rs.getReturnCode()+"|Desc: "+rs.getReturnDesc()+"|Cycle: "+rs.getCycle()+"|Price: "+rs.getPrice());
             switch(rs.getReturnCode()) {
                 case "-1":
                     addNewProfile(msisdn);
-                    if(AddService(msisdn, chanel, username, packageID)) {
-                        return register_direct(msisdn, packageID, smsID, chanel, chargin, username);
+                    if(AddService(msisdn, chanel, username, packageID,isAutoRenew)) {
+                        return register_direct(msisdn, packageID, smsID, chanel, chargin, username,isAutoRenew);
                     } else {
                         rs.setReturnCode("0");
                         rs.setReturnDesc("KHONG THE KHOI TAO THONG TIN KHACH HANG");
@@ -373,16 +374,16 @@ public class ServiceProcess {
         }
     }
     
-    public ReturnRegister register_free(String msisdn, String packageID, int price, int day, long smsID, String chanel, Charging chargin,String username) {
+    public ReturnRegister register_free(String msisdn, String packageID, int price, int day, long smsID, String chanel, Charging chargin,String username, boolean isAutoRenew) {
 
         ReturnRegister rs = new ReturnRegister();
         try {//try level 1
-            rs = DoChargingCustom(msisdn, packageID,price,day,1,smsID, chanel, chargin, username);
+            rs = DoChargingCustom(msisdn, packageID,price,day,1,smsID, chanel, chargin, username,isAutoRenew);
             switch(rs.getReturnCode()) {
                 case "-1":
                     addNewProfile(msisdn);
-                    if(AddService(msisdn, chanel, username, packageID)) {
-                        return register_free(msisdn, packageID,price,day,smsID, chanel, chargin, username);
+                    if(AddService(msisdn, chanel, username, packageID,isAutoRenew)) {
+                        return register_free(msisdn, packageID,price,day,smsID, chanel, chargin, username,isAutoRenew);
                     } else {
                         rs.setReturnCode("0");
                         rs.setReturnDesc("KHONG THE KHOI TAO THONG TIN KHACH HANG");
@@ -399,7 +400,7 @@ public class ServiceProcess {
         }
     }
     
-    public ReturnRegister register_free_cycle(String msisdn, String packageID, int price, int cycle, long smsID, String chanel, Charging chargin,String username) {
+    public ReturnRegister register_free_cycle(String msisdn, String packageID, int price, int cycle, long smsID, String chanel, Charging chargin,String username, boolean isAutoRenew) {
 
         ReturnRegister rs = new ReturnRegister();
         try {//try level 1
@@ -407,12 +408,12 @@ public class ServiceProcess {
             if(pack==null || pack.getPackageID()==null) {
                 pack = packCtl.getPackageByID("D1");
             }
-            rs = DoChargingCustom(msisdn, packageID,price,pack.getNumOfDate(),cycle,smsID, chanel, chargin, username);
+            rs = DoChargingCustom(msisdn, packageID,price,pack.getNumOfDate(),cycle,smsID, chanel, chargin, username,isAutoRenew);
             switch(rs.getReturnCode()) {
                 case "-1":
                     addNewProfile(msisdn);
-                    if(AddService(msisdn, chanel, username, packageID)) {
-                        return register_free_cycle(msisdn, packageID,price,cycle,smsID, chanel, chargin, username);
+                    if(AddService(msisdn, chanel, username, packageID,isAutoRenew)) {
+                        return register_free_cycle(msisdn, packageID,price,cycle,smsID, chanel, chargin, username,isAutoRenew);
                     } else {
                         rs.setReturnCode("0");
                         rs.setReturnDesc("KHONG THE KHOI TAO THONG TIN KHACH HANG");
@@ -430,7 +431,7 @@ public class ServiceProcess {
         }
     }
 
-    public ReturnRegister DoCharging(String msisdn, String packageID, long smsID, String chanel, Charging chargin,String username) {
+    public ReturnRegister DoCharging(String msisdn, String packageID, long smsID, String chanel, Charging chargin,String username, boolean isAutoRenew) {
         System.out.println("Call Do Charging");
         ReturnRegister result = new ReturnRegister();
         try {
@@ -440,7 +441,7 @@ public class ServiceProcess {
                 packageID = "D1";
             }
             pack = packCtl.getPackageByID(packageID);
-            return DoChargingCustom(msisdn, pack.getPackageID(),(int) pack.getPrice(), (int)pack.getNumOfDate(),1, smsID, chanel, chargin, username);
+            return DoChargingCustom(msisdn, pack.getPackageID(),(int) pack.getPrice(), (int)pack.getNumOfDate(),1, smsID, chanel, chargin, username, isAutoRenew);
         }catch(Exception e) {
             result.setReturnCode("0");
             result.setReturnDesc("DANG KY KHONG THANH CONG");
@@ -448,7 +449,7 @@ public class ServiceProcess {
         return result;
     }
     
-    public ReturnRegister DoChargingCustom(String msisdn, String packageID, int price, int day, int cycle, long smsID, String chanel, Charging chargin,String username) {
+    public ReturnRegister DoChargingCustom(String msisdn, String packageID, int price, int day, int cycle, long smsID, String chanel, Charging chargin,String username, boolean isAutoRenew) {
         System.out.println("Call Do Charging");
         ReturnRegister result = new ReturnRegister();
         result.setCycle(cycle);
@@ -463,6 +464,7 @@ public class ServiceProcess {
             vn.ctnet.entity.Service service = serviceDao.getServiceByPhone(msisdn);
             if(service!=null && !"".equals(service.getPackageID()) && service.getPackageID()!=null) {
                 System.out.println("Co service: "+service.getPackageID()+"|"+service.getPhone());
+                service.setIsAutoRenew(isAutoRenew);
                 if (d.before(service.getExpDate()) && (!service.getStatus().equals("0")) && (!service.getStatus().equals("4"))) {
                     System.out.println("Service con han su dung");
                     result.setReturnCode("2");
@@ -481,6 +483,7 @@ public class ServiceProcess {
             //try level 3
                 try {
                     System.out.println("Tru tien KH");
+                    
                     //login charing tru tien
                     String rs = chargin.debit(msisdn, (long)price, "049193", msisdn, vn.ctnet.mdeal.config.Utils.getCategoryId(pack.getPackageID(), 10), vn.ctnet.mdeal.config.Utils.getCategoryId(pack.getPackageID(), 6), 272);
                     Cdr cdr = new Cdr();
@@ -627,7 +630,7 @@ public class ServiceProcess {
         }
     }
     
-    public boolean AddService(String msisdn, String channel, String username, String packageId) {
+    public boolean AddService(String msisdn, String channel, String username, String packageId, boolean isAutoRenew) {
         try{
             Service service = new Service();
             service.setSmsmoID(BigInteger.valueOf(0));
@@ -645,6 +648,7 @@ public class ServiceProcess {
             service.setRegisterChannel(channel);
             service.setNote("DK_VIA_"+channel);
             service.setUserModified(username);
+            service.setIsAutoRenew(isAutoRenew);
             //Cập nhật thông tin thuê bao
             serviceDao.insert(service);
             return true;

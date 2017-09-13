@@ -58,7 +58,16 @@ public class Service  {
 
     private String userModified;
     private String note;
+    private boolean isAutoRenew;
 
+    public boolean isIsAutoRenew() {
+        return isAutoRenew;
+    }
+
+    public void setIsAutoRenew(boolean isAutoRenew) {
+        this.isAutoRenew = isAutoRenew;
+    }
+    
     public String getUserModified() {
         return userModified;
     }

@@ -77,7 +77,7 @@ public class vasapi {
             }
  
             ServiceProcess sm = new ServiceProcess();
-            ReturnRegister rs = sm.register_direct(Helper.initPhoneNumber(msisdn, 3), packagecode, 0, ("".equals(channel) || channel==null ? "MSOCIAL": channel),Cog.charging,username);
+            ReturnRegister rs = sm.register_direct(Helper.initPhoneNumber(msisdn, 3), packagecode, 0, ("".equals(channel) || channel==null ? "MSOCIAL": channel),Cog.charging,username,false);
             System.out.println(rs.getChargingResult()+"|"+rs.getPackageId()+"|"+rs.getReturnCode()+"|"+rs.getReturnDesc());
             try {
                 log.setResult(rs.getReturnCode()+"|"+rs.getReturnDesc()+"|"+rs.getPackageId()+"|"+rs.getPrice());
@@ -134,7 +134,7 @@ public class vasapi {
             }
  
             ServiceProcess sm = new ServiceProcess();
-            ReturnRegister rs = sm.register_free(Helper.initPhoneNumber(msisdn, 3), packagecode, price, freeday,0 ,("".equals(channel) || channel==null ? "MSOCIAL": channel),Cog.charging,username);
+            ReturnRegister rs = sm.register_free(Helper.initPhoneNumber(msisdn, 3), packagecode, price, freeday,0 ,("".equals(channel) || channel==null ? "MSOCIAL": channel),Cog.charging,username,false);
             try {
                 log.setResult(rs.getReturnCode()+"|"+rs.getReturnDesc()+"|"+rs.getPackageId()+"|"+rs.getPrice());
                 logDao.insert(log);
@@ -189,7 +189,7 @@ public class vasapi {
             }
  
             ServiceProcess sm = new ServiceProcess();
-            ReturnRegister rs = sm.register_free_cycle(Helper.initPhoneNumber(msisdn, 3), packagecode, price, cycle,0 ,("".equals(channel) || channel==null ? "MSOCIAL": channel),Cog.charging,username);
+            ReturnRegister rs = sm.register_free_cycle(Helper.initPhoneNumber(msisdn, 3), packagecode, price, cycle,0 ,("".equals(channel) || channel==null ? "MSOCIAL": channel),Cog.charging,username,false);
             try {
                 log.setResult(rs.getReturnCode()+"|"+rs.getReturnDesc()+"|"+rs.getPackageId()+"|"+rs.getPrice());
                 logDao.insert(log);
