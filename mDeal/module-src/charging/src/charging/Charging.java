@@ -360,7 +360,7 @@ public class Charging extends Thread {
      * @param amount
      * @throws Exception
      */
-    public String debit(String isdn, long amount, String serviceCode, String bsisdn, String contentId, String categoryId, int requestAction) throws Exception {
+    public String debit(String isdn, long amount, String serviceCode, String bsisdn, String contentId, String categoryId, int requestAction, String extra_info) throws Exception {
         System.out.println(">>>Charging UserId:" + isdn + ":Amount:" + amount + ":ServiceCode:" + serviceCode + ":ShortCodeCharging:" + Utilities.CHARGING_PROXY_SHORT_CODE);
         isdn = Utilities.formatUserId(isdn);
         CdrLog log = new CdrLog();
@@ -447,6 +447,7 @@ public class Charging extends Thread {
             avpSet.addAvp(10114, contentId, true, false, true);
             avpSet.addAvp(10115, Utilities.CHARGING_PROXY_SHORT_CODE, true, false, true);
             avpSet.addAvp(10116, bsisdn, true, false, true);
+            avpSet.addAvp(10117,((null==extra_info || "".equals(extra_info)) ? "" : extra_info ),true, false, true);
 //            avpSet.addAvp(20000, Utilities.IP_LOCAL, true, false, false);
 //            avpSet.addAvp(20001, sessionId, true, false, false);
 
@@ -504,8 +505,12 @@ public class Charging extends Thread {
         }
         return resultCode;
     }
+    
+    public String debit(String isdn, long amount, String serviceCode, String bsisdn, String contentId, String categoryId, int requestAction) throws Exception {
+        return debit(isdn, amount, serviceCode, bsisdn, contentId, categoryId, requestAction,"");
+    }
 
-    public String debitRecharge(String isdn, long amount, String serviceCode, String bsisdn, String contentId, String categoryId, int requestAction) throws Exception {
+    public String debitRecharge(String isdn, long amount, String serviceCode, String bsisdn, String contentId, String categoryId, int requestAction, String extra_info) throws Exception {
         CdrLog log = new CdrLog();
         log.setSessionLogin(sessionId);
         log.setIsdn(isdn);
@@ -586,7 +591,7 @@ public class Charging extends Thread {
             avpSet.addAvp(10114, contentId, true, false, true);
             avpSet.addAvp(10115, Utilities.CHARGING_PROXY_SHORT_CODE, true, false, true);
             avpSet.addAvp(10116, bsisdn, true, false, true);
-
+            avpSet.addAvp(10117,((null==extra_info || "".equals(extra_info)) ? "" : extra_info ),true, false, true);
             Future<Message> future = session.send(request);
             Answer response = (Answer) future.get();
 
@@ -611,6 +616,10 @@ public class Charging extends Thread {
             session.release();
         }
 
+    }
+    
+    public String debitRecharge(String isdn, long amount, String serviceCode, String bsisdn, String contentId, String categoryId, int requestAction) throws Exception {
+        return debitRecharge(isdn, amount, serviceCode, bsisdn, contentId, categoryId, requestAction, "");
     }
 
     /**

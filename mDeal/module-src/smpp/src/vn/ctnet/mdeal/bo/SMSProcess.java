@@ -1033,7 +1033,163 @@ public class SMSProcess {
             sendSMS(msisdn, "9193", msg, smsID);
             
         }
+    }
+    
+    public void QueueConfirmRegister(String msisdn, String pkg, long smsId) {
+        int confirmExpAfterMinute = Integer.parseInt(getValue("confirm_exp_after_minute"));
+        vn.ctnet.entity.Package pack;
+        try 
+        {
+            //lấy thông tin gói cước
+            pack = packCtl.getPackageByID(pkg);
+            
+            /*
+            Nếu thông tin gói cước không tồn tại, báo hủy không thành công cho người dùng
+            */
+            if (pack == null || pack.getPackageID() == null) {
+                String msg = getSms("msg_wrong");
+                sendSMS(msisdn, "9193", msg, smsId);
+                return;
+            }
+            
+            /**
+             * Nếu gói cước tồn tại, xử lý gởi xác nhận hủy
+             */
+            try 
+            {
+                Date d = new Date();
+                //Lấy thông tin thuê bao
+                vn.ctnet.entity.Service service = serviceDao.getServiceByPhone(msisdn);
+                
+                /*
+                Nếu thuê bao đang hoạt động thong bao goi cuoc da ton tai
+                */
+                if ( //huy dich vu khi dich vu dang hoat dong
+                        (d.before(service.getExpDate()) //con han su dung
+                        && (!service.getStatus().equals("0")) //trang thai dang kich hoat
+                        && service.getPackageID().equals(pack.getPackageID()) //goi cuoc co ton tai
+                        )
+                        || ((service.getStatus().equals("4")) //trang thai dang retry
+                        && service.getPackageID().equals(pack.getPackageID())) //goi cuoc co ton tai
+                        ) {
+                    /*
+                    Đưa vào danh sách queue
+                    */
+                    String msg = getSms("msg_sv_exist");
+                    msg = msg.replace("{GOI}", service.getPackageID());
+                    msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
+                    msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
+                    SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
+                    msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
+                    sendSMS(msisdn, "mDeal", msg, smsId);
+                }
+                /*
+                Nếu gói cước tồn tại nhưng đã hết hạn sử dụng add queue register
+                */
+                else 
+                {
+                    try {
+                        QueueRequest queueRequest = new QueueRequest();
+                        queueRequest.setAction("REGISTER_"+pkg);
+                        queueRequest.setCreateDate(new Timestamp(new Date().getTime()));
+                        queueRequest.setExpDate(new Timestamp(vn.ctnet.mdeal.config.Utils.addMinute(confirmExpAfterMinute).getTime()));
+                        queueRequest.setPhone(msisdn);
+                        queueRequest.setStatus(false);
+                        
+                        QueueDAO.insert(queueRequest);
+                        System.out.println("Insert queue thanh cong");
+                        /*
+                        Gởi thông báo hủy thành công
+                        */
+                        String msg = vn.ctnet.common.Constant.MSG_CONFIRM_REGISTER;
+                        System.out.println(msg);
+                        msg = msg.replace("{GOI}", pack.getPackageID());
+                        msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
+                        msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
+                        msg = msg.replace("{PHUT}", confirmExpAfterMinute+"");
+                        System.out.println(msg);
+                        sendSMS(msisdn, "9193", msg, smsId);
+                        return;
+                    } 
+                    catch(Exception e) 
+                    {
+                        System.err.println(e.getMessage());
+                         String msg = getSms("msg_err_sys");
+                         sendSMS(msisdn, "9193", msg, smsId);
+                    }
+                    return;
+                }
 
+            }
+            //Nếu thuê bao không tồn tại
+            catch (Exception e) 
+            {
+                /*
+                 Khởi tạo thông tin, thêm mới người dùng
+                 */
+                try {
+                    System.out.println("Tao moi profile");
+                    addNewProfile(msisdn);
+                } catch (Exception ex) {
+                    System.out.println("Profile da ton tai");
+                }
+                try {
+                        QueueRequest queueRequest = new QueueRequest();
+                        queueRequest.setAction("REGISTER_"+pkg);
+                        queueRequest.setCreateDate(new Timestamp(new Date().getTime()));
+                        queueRequest.setExpDate(new Timestamp(vn.ctnet.mdeal.config.Utils.addMinute(confirmExpAfterMinute).getTime()));
+                        queueRequest.setPhone(msisdn);
+                        queueRequest.setStatus(false);
+                        
+                        QueueDAO.insert(queueRequest);
+                        System.out.println("Insert queue success");
+                        /*
+                        Gởi thông báo hủy thành công
+                        */
+                        int free_day = Integer.parseInt(getValue("free_day"));
+                        String msg = vn.ctnet.common.Constant.MSG_CONFIRM_REGISTER_FREE;
+                        System.out.println(msg);
+                        msg = msg.replace("{GOI}", pack.getPackageID());
+                        msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
+                        msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
+                        msg = msg.replace("{FREE}", free_day + "");
+                        System.out.println(msg);
+                        sendSMS(msisdn, "9193", msg, smsId);
+                        return;
+                    } 
+                    catch(Exception ex) 
+                    {
+                        System.err.println("Free: "+ex.getMessage());
+                         String msg = getSms("msg_err_sys");
+                         sendSMS(msisdn, "9193", msg, smsId);
+                    }
+                    return;
+            }
+        } catch (Exception e) {
+            /*
+            Gởi MT thông báo hủy không thành công
+            */
+            e.printStackTrace();
+            String msg = getSms("msg_wrong");
+            msg = msg.replace("{GOI}", pkg);
+            sendSMS(msisdn, "9193", msg, smsId);
+            
+        }
+    }
+    
+    public void RegisterAccepted(String msisdn, String pkg, long smsId, String chanel, Charging chargin) throws ClassNotFoundException, SQLException {
+        ArrayList<QueueRequest> qr = QueueDAO.GetQueueByParam(msisdn, ("REGISTER_"+pkg),0);
+             if(qr!=null && qr.size()>0) {
+                 for(QueueRequest q : qr) {
+                     q.setStatus(true);
+                     QueueDAO.update(q);
+                 }
+             } else {
+                    String msg = getSms("msg_wrong");
+                    sendSMS(msisdn, "9193", msg, smsId);
+                 return;
+             }
+            register(msisdn,pkg, smsId, chanel, null);
     }
     
     public void UnregisterAccepted(String msisdn, String pkg, long smsID) throws ClassNotFoundException, SQLException 
@@ -1042,7 +1198,7 @@ public class SMSProcess {
              * Kiem tra thue bao co goi ban tin huy hay chua, va ban tin co hieu lục hay khong
              */
              
-             ArrayList<QueueRequest> qr = QueueDAO.GetQueueByParam(msisdn,0);
+             ArrayList<QueueRequest> qr = QueueDAO.GetQueueByParam(msisdn, "UNREGISTER",0);
              if(qr!=null && qr.size()>0) {
                  for(QueueRequest q : qr) {
                      q.setStatus(true);

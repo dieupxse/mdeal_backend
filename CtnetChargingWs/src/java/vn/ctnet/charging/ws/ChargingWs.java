@@ -24,7 +24,7 @@ import vn.ctnet.mdeal.entity.ReturnRegister;
  */
 @WebService(serviceName = "ChargingWs")
 public class ChargingWs {
-    private final Charging charging = new Charging();
+    private static Charging charging = null;
     /**
      * Web service operation
      *
@@ -43,6 +43,7 @@ public class ChargingWs {
         OutputString output = new OutputString();
         try {
             ServiceProcess sm = new ServiceProcess();
+            if(charging==null) charging = new Charging();
             String rs = sm.register(initPhoneNumber(msisdn, 3), packageCode, 0,channel,charging,user,true);
             rs = rs.replace("|", ":");
             String message = rs.replace(":", "|");
@@ -64,6 +65,7 @@ public class ChargingWs {
         OutputString output = new OutputString();
         try {
             ServiceProcess sm = new ServiceProcess();
+            if(charging==null) charging = new Charging();
             ReturnRegister rs = sm.register_direct(initPhoneNumber(msisdn, 3), packageCode, 0,channel,charging,"",true);
             return output.register(rs.getReturnCode(),rs.getReturnDesc());
         } catch (Exception e) {
@@ -82,6 +84,7 @@ public class ChargingWs {
         OutputString output = new OutputString();
         try {
             CustomServiceProcess sm = new CustomServiceProcess();
+            if(charging==null) charging = new Charging();
             String rs = sm.register_custom(initPhoneNumber(msisdn, 3), packageCode, 0,channel,charging,statusMT,note);
             rs = rs.replace("|", ":");
             String message = rs.replace(":", "|");
@@ -112,7 +115,7 @@ public class ChargingWs {
             //   System.out.println("3");
             ServiceProcess sm = new ServiceProcess();
             String rs = sm.unregister(initPhoneNumber(msisdn, 3), packageCode, 0, channel,user);
-//sm.unregister(msisdn, packageCode, 0, "VAS");
+            //sm.unregister(msisdn, packageCode, 0, "VAS");
             //     System.out.println(rs);
             //     System.out.println("4");
             rs = rs.replace("|", ":");
@@ -123,6 +126,33 @@ public class ChargingWs {
         } 
     }
 
+    /**
+     * Web service operation
+     *
+     * @param msisdn
+     * @param packageCode
+     * @param channel
+     * @return
+     */
+    @WebMethod(operationName = "QueueConfirmRegister")
+    public Reply QueueConfirmRegister(
+            @WebParam(name = "msisdn") String msisdn, 
+            @WebParam(name = "packageCode") String packageCode) {
+        //TODO write your implementation code here:
+        OutputString output = new OutputString();
+        try {
+            //   System.out.println("3");
+            ServiceProcess sm = new ServiceProcess();
+            ReturnRegister rs = sm.QueueConfirmRegister(initPhoneNumber(msisdn, 3), packageCode, "API");
+            //sm.unregister(msisdn, packageCode, 0, "VAS");
+            //     System.out.println(rs);
+            //     System.out.println("4");
+            
+            return output.unregister(rs.getReturnCode(),rs.getReturnCode()+""+ rs.getReturnDesc());
+        } catch (Exception e) {
+            return output.register("0", "0|HUY_KHONG_THANH_CONG_XIN_VUI_LONG_THU_LAI_SAU");
+        } 
+    }
     /**
      * Web service operation
      *

@@ -29,12 +29,13 @@ import vn.ctnet.entity.SmsContent;
  * @author vanvtse90186
  */
 public class SMSReciever {
+
     /*
      Khai báo biến
      */
-
     private final PackageDAO packageDAO = new PackageDAO();
     private final SmsMoDAO smsDAO = new SmsMoDAO();
+
     /**
      * Hàm gởi tạo bản tin MO
      *
@@ -90,7 +91,7 @@ public class SMSReciever {
         SMSProcess exe = new SMSProcess();
         //lấy config bật chức năng hủy gói
         String enable_unregister = getValue("enable_unregister");
-
+        String enable_confirm_register = getValue("enable_confirm_register");
         //Xử lý logic
         try {
             /*
@@ -106,12 +107,22 @@ public class SMSReciever {
                         if (action[1] == null || "".equals(action[1])) {
                             action[1] = "";
                         }
-                        exe.register(msisdn, action[1], smsID, "SMS", null);
+                        if ("1".equals(enable_confirm_register)) {
+                            exe.QueueConfirmRegister(msisdn, action[1], 0);
+                        } else {
+                            exe.register(msisdn, action[1], smsID, "SMS", null);
+                        }
+
                     } else {
-                        exe.register(msisdn, "D1", smsID, "SMS", null);
+                        if ("1".equals(enable_confirm_register)) {
+                            exe.QueueConfirmRegister(msisdn, "D1", 0);
+                        } else {
+                            exe.register(msisdn, "D1", smsID, "SMS", null);
+                        }
+
                     }
                     break;
-                
+
                 /*
                  Cú pháp hủy    
                  */
@@ -122,32 +133,43 @@ public class SMSReciever {
                                 String msg = getSms("msg_wrong");
                                 exe.sendSMS(msisdn, "9193", msg, (long) smsID);
                             } else {
-                                 exe.QueueCancel(msisdn, action[1], (long) smsID);
+                                exe.QueueCancel(msisdn, action[1], (long) smsID);
                             }
-                           
+
                         } else {
                             String msg = getSms("msg_wrong");
                             exe.sendSMS(msisdn, "9193", msg, (long) smsID);
                         }
                     }
                     break;
-                
+
                 //xac nhận hủy gói cước
                 case "YES":
-                    exe.UnregisterAccepted(msisdn,"", smsID);
-                break;  
+                    exe.UnregisterAccepted(msisdn, "", smsID);
+                    break;
+                //xac nhan dang ky goi cuoc
+                case "Y":
+
+                    String pkag = "D1";
+                    if ("".equals(action[1]) || action[1] == null) {
+                        pkag = "D1";
+                    } else {
+                        pkag = action[1].toUpperCase();
+                    }
+                    exe.RegisterAccepted(msisdn, pkag, smsID, "SMS", null);
+                    break;
                 /*
                  Cú pháp hướng dẫn   
                  */
                 case "HD":
                     exe.guideUser(msisdn, (long) 0);
                     break;
-                    
+
                 //cú pháp kiểm tra thông tin thuê bao
                 case "KT":
                     exe.checkProfile(msisdn, (long) 0, "SMS");
                     break;
-                    
+
                 //Cú pháp tải ứng dụng
                 case "TAI":
                     exe.tai(msisdn, (long) smsID);
@@ -161,41 +183,57 @@ public class SMSReciever {
                     - UD30,KM30: Đăng ký gới D30
                     - UD90,KM90: Đăng ký gói D90
                     - Y: Xác nhận hủy gói
-                */
+                 */
                 //nhan ma giam gia
                 case "MA":
-                    boolean dkOk = exe.checkStatusAndRegister(msisdn, smsID, "SYS",charging);
-                    if(dkOk==true) 
-                    {
+                    boolean dkOk = exe.checkStatusAndRegister(msisdn, smsID, "SYS", charging);
+                    if (dkOk == true) {
                         exe.getMcard(msisdn, smsID);
                     }
-                   
-                break;
-                    
+
+                    break;
+
                 //dang ky D1
                 case "UD":
                 case "KM":
-                    exe.register(msisdn, "D1", smsID, "SMS", null);
-                break;
-                    
+                    if ("1".equals(enable_confirm_register)) {
+                        exe.QueueConfirmRegister(msisdn,"D1", 0);
+                    } else {
+                        exe.register(msisdn, "D1", smsID, "SMS", null);
+                    }
+
+                    break;
+
                 //Dang ky D7
                 case "UD7":
                 case "KM7":
-                    exe.register(msisdn, "D7", smsID, "SMS", null);
-                break;
-                    
+                    if ("1".equals(enable_confirm_register)) {
+                        exe.QueueConfirmRegister(msisdn,"D7", 0);
+                    } else {
+                        exe.register(msisdn, "D7", smsID, "SMS", null);
+                    }
+                    break;
+
                 //Dang ky D30
                 case "UD30":
                 case "KM30":
-                    exe.register(msisdn, "D30", smsID, "SMS", null);
-                break;
-                    
+                    if ("1".equals(enable_confirm_register)) {
+                        exe.QueueConfirmRegister(msisdn,"D30", 0);
+                    } else {
+                        exe.register(msisdn, "D30", smsID, "SMS", null);
+                    }
+                    break;
+
                 //Dang ky D90
                 case "UD90":
                 case "KM90":
-                    exe.register(msisdn, "D90", smsID, "SMS", null);
-                break;
-                    
+                    if ("1".equals(enable_confirm_register)) {
+                        exe.QueueConfirmRegister(msisdn,"D90", 0);
+                    } else {
+                        exe.register(msisdn, "D90", smsID, "SMS", null);
+                    }
+                    break;
+
                 //trường hợp nhắn tin sai cú pháp
                 default:
                     //khong co noi dung
@@ -203,20 +241,20 @@ public class SMSReciever {
                         System.out.println("Cu phap khong dung");
                         String msg = getSms("msg_wrong");
                         exe.sendSMS(msisdn, "9193", msg, (long) smsID);
-                    } 
-                    //có nội dung
-                    else 
-                    {
+                    } //có nội dung
+                    else {
                         //nếu tin nhắn là tên gói cước, lấy thông tin gói cước
                         vn.ctnet.entity.Package pkg = packageDAO.getPackageByID(action[0].trim().toUpperCase());
-                        
+
                         //nếu gói cước tồn tại, đăng ký gói cước tương ứng
                         if (pkg != null && pkg.getPackageID() != null) {
-                            exe.register(msisdn, pkg.getPackageID(), smsID, "SMS", null);
-                        } 
-                        //nếu gói cước không tồn tại, xử lý chuỗi thông minh
-                        else 
-                        {
+                            if ("1".equals(enable_confirm_register)) {
+                                exe.QueueConfirmRegister(msisdn, pkg.getPackageID(), smsID);
+                            } else {
+                                exe.register(msisdn, pkg.getPackageID(), smsID, "SMS", null);
+                            }
+                        } //nếu gói cước không tồn tại, xử lý chuỗi thông minh
+                        else {
                             String text = action[0].toUpperCase();
                             text = text.toUpperCase();
                             //Nếu tin nhắn gửi lên bắt đầu bằng DK
@@ -224,56 +262,67 @@ public class SMSReciever {
                                 text = text.substring(2);
                                 String pk = text.substring(0, 3);
                                 //3 ký tự tiếp theo là tên gói cước D30, hoặc D90 thì đăng ký gói cước
-                                if (pk.equals("D30") || pk.equals("D90"))  
-                                {
+                                if (pk.equals("D30") || pk.equals("D90")) {
                                     System.out.println("Dang ky goi " + pk);
-                                    exe.register(msisdn, pk, smsID, "SMS", null);
-                                }
-                                //nếu không phải
-                                else 
-                                {
+                                    if ("1".equals(enable_confirm_register)) {
+                                        exe.QueueConfirmRegister(msisdn, pk, smsID);
+                                    } else {
+                                        exe.register(msisdn, pk, smsID, "SMS", null);
+                                    }
+
+                                } //nếu không phải
+                                else {
                                     pk = text.substring(0, 2);
                                     //nếu 2 ký tự tiếp theo của chuỗi là tên gói cước D1 hoặc D7 thì đăng ký gói cước
-                                    if (pk.equals("D1") || pk.equals("D7")) 
-                                    {
+                                    if (pk.equals("D1") || pk.equals("D7")) {
                                         System.out.println("Dang ky goi " + pk);
-                                        exe.register(msisdn, pk, smsID, "SMS", null);
+                                        if ("1".equals(enable_confirm_register)) {
+                                            exe.QueueConfirmRegister(msisdn, pk, smsID);
+                                        } else {
+                                            exe.register(msisdn, pk, smsID, "SMS", null);
+                                        }
                                     } else {
-                                        exe.register(msisdn, "D1", smsID, "SMS", null);
+                                        if ("1".equals(enable_confirm_register)) {
+                                            exe.QueueConfirmRegister(msisdn, "D1", smsID);
+                                        } else {
+                                            exe.register(msisdn, "D1", smsID, "SMS", null);
+                                        }
                                     }
                                 }
-                            } 
-                            //Nếu tin nhắn bắt đầu bằng D tên gói cước
-                            else if (text.startsWith("D")) 
-                            {
+                            } //Nếu tin nhắn bắt đầu bằng D tên gói cước
+                            else if (text.startsWith("D")) {
                                 text = text.substring(1);
                                 String pk = text.substring(0, 3);
                                 //nếu 3 ký tự đầu tiên của chuỗi là D30 hoặc D90 thì đăng ký gói cước
-                                if (pk.equals("D30") || pk.equals("D90")) 
-                                {
+                                if (pk.equals("D30") || pk.equals("D90")) {
                                     System.out.println("Dang ky goi " + pk);
-                                    exe.register(msisdn, pk, smsID, "SMS", null);
-                                }
-                                //nếu không phải
-                                else 
-                                {
-                                    pk = text.substring(0, 2);
-                                    //nếu 2 ký tự đầu tiên của tin nhắn gởi lên là D1, hoặc D7 thì đăng ký gói cước
-                                    if (pk.equals("D1") || pk.equals("D7")) 
-                                    {
-                                        System.out.println("Dang ky goi " + pk);
+                                    if ("1".equals(enable_confirm_register)) {
+                                        exe.QueueConfirmRegister(msisdn, pk, smsID);
+                                    } else {
                                         exe.register(msisdn, pk, smsID, "SMS", null);
                                     }
-                                    //nếu không thì đăng ký D1
-                                    else 
-                                    {
-                                        exe.register(msisdn, "D1", smsID, "SMS", null);
+                                } //nếu không phải
+                                else {
+                                    pk = text.substring(0, 2);
+                                    //nếu 2 ký tự đầu tiên của tin nhắn gởi lên là D1, hoặc D7 thì đăng ký gói cước
+                                    if (pk.equals("D1") || pk.equals("D7")) {
+                                        System.out.println("Dang ky goi " + pk);
+                                        if ("1".equals(enable_confirm_register)) {
+                                            exe.QueueConfirmRegister(msisdn, pk, smsID);
+                                        } else {
+                                            exe.register(msisdn, pk, smsID, "SMS", null);
+                                        }
+                                    } //nếu không thì đăng ký D1
+                                    else {
+                                        if ("1".equals(enable_confirm_register)) {
+                                            exe.QueueConfirmRegister(msisdn, "D1", smsID);
+                                        } else {
+                                            exe.register(msisdn, "D1", smsID, "SMS", null);
+                                        }
                                     }
                                 }
-                            }
-                            //nếu tin nhắn không bắt đầu bằng DK hoặc D thì thông báo sai cú pháp
-                            else 
-                            {
+                            } //nếu tin nhắn không bắt đầu bằng DK hoặc D thì thông báo sai cú pháp
+                            else {
                                 System.out.println("Cu phap khong dung");
                                 String msg = getSms("msg_wrong");
                                 exe.sendSMS(msisdn, "9193", msg, (long) smsID);
@@ -282,10 +331,8 @@ public class SMSReciever {
                     }
                     break;
             }
-        }
-        //Nếu xảy ra lỗi thì thông báo sai cú pháp
-        catch (Exception e) 
-        {
+        } //Nếu xảy ra lỗi thì thông báo sai cú pháp
+        catch (Exception e) {
             e.printStackTrace();
             System.out.println(e.getMessage());
             String msg = getSms("msg_wrong");
@@ -293,29 +340,31 @@ public class SMSReciever {
         }
         return "";
     }
-    
+
     /**
      * Hàm lấy nội dung bản tin MT
+     *
      * @param name
-     * @return 
+     * @return
      */
-    public String getSms(String name) 
-    {
-        
+    public String getSms(String name) {
+
         Properties prop = new Properties();
         InputStream input = null;
         Reader reader = null;
         SmsContentDAO smsDao = new SmsContentDAO();
         try {
             SmsContent sc = smsDao.getSms(name);
-            if(sc!=null && !"".equals(sc.getContent())) return sc.getContent();
-        } catch(Exception e) {
-        
+            if (sc != null && !"".equals(sc.getContent())) {
+                return sc.getContent();
+            }
+        } catch (Exception e) {
+
         }
         try {
             String path = "C:\\mdeal_config\\sms.properties";
             input = new FileInputStream(new File(path));
-            reader = new InputStreamReader(input,Charset.forName("UTF-8"));
+            reader = new InputStreamReader(input, Charset.forName("UTF-8"));
             // load a properties file
             prop.load(reader);
             return prop.getProperty(name);
@@ -336,8 +385,9 @@ public class SMSReciever {
 
     /**
      * Hàm lấy giá trị config
+     *
      * @param name
-     * @return 
+     * @return
      */
     public String getValue(String name) {
         Properties prop = new Properties();

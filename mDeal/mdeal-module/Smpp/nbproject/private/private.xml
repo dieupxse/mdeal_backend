@@ -9,7 +9,9 @@
             <file>file:/D:/DATA/GIT/mdeal_backend/mDeal/module-src/smpp/src/vn/ctnet/mdeal/bo/CustomServiceProcess.java</file>
             <file>file:/D:/DATA/GIT/mdeal_backend/mDeal/module-src/smpp/src/vn/ctnet/mdeal/Process.java</file>
             <file>file:/D:/DATA/GIT/mdeal_backend/mDeal/module-src/smpp/src/org/jsmpp/ctnet/RewriteSentMessage.java</file>
+            <file>file:/D:/DATA/GIT/mdeal_backend/mDeal/module-src/smpp/src/vn/ctnet/common/Constant.java</file>
             <file>file:/D:/DATA/GIT/mdeal_backend/mDeal/module-src/smpp/src/org/jsmpp/ctnet/ThreatReceiverSMS.java</file>
+            <file>file:/D:/DATA/GIT/mdeal_backend/mDeal/module-src/smpp/src/vn/ctnet/mdeal/bo/SMSProcess.java</file>
         </group>
     </open-files>
 </project-private>

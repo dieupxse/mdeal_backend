@@ -298,4 +298,41 @@ public class QueueRequestDAO {
         }
         return list;
     }
+    
+    public ArrayList<QueueRequest> GetQueueByParam(String phone, String action, int status) throws ClassNotFoundException, SQLException
+    {
+        ArrayList<QueueRequest> list = null;
+        Database DB = new Database();
+        Connection conn = DB.connection();
+        String sql = "SELECT * FROM QUEUE_REQUEST WHERE Phone = ? and status = ? and Action = ?"; 
+        
+        PreparedStatement pstm = conn.prepareStatement(sql);
+        pstm.setString(1, phone);
+        pstm.setInt(2, status);
+        pstm.setString(3, action);
+        ResultSet rs = pstm.executeQuery();
+        if(rs != null){
+            list = new ArrayList<>();
+            while(rs.next()){
+                QueueRequest q = new QueueRequest();
+                q.setID(rs.getLong("ID"));
+                q.setPhone(rs.getString("Phone"));
+                q.setAction(rs.getString("Action"));
+                q.setCreateDate(rs.getTimestamp("CreateDate"));
+                q.setExpDate(rs.getTimestamp("ExpDate"));
+                q.setStatus(rs.getBoolean("Status"));
+                list.add(q);
+            }
+        }
+        if (rs != null) {
+            rs.close();
+        }
+        if (pstm != null) {
+            pstm.close();
+        }
+        if (conn != null) {
+            conn.close();
+        }
+        return list;
+    }
 }

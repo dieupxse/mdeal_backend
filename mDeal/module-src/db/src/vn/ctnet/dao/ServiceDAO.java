@@ -22,6 +22,7 @@ public class ServiceDAO {
     private final String numOfRenewD1 = Ultility.getValue("number_renew_D1");
     private final String numOfRenewD7 = Ultility.getValue("number_renew_D7");
     private final String numOfRenewD30 = Ultility.getValue("number_renew_D30");
+    private final String startDatePushWarningMsg = Ultility.getValue("start_date_push_warning_msg");
 
     public boolean insert(Service sv) throws ClassNotFoundException, SQLException {
         Database DB = new Database();
@@ -369,7 +370,7 @@ public class ServiceDAO {
         ArrayList<Service> list = null;
         Database DB = new Database();
         Connection conn = DB.connection();
-        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE Status ='2' and PackageID = 'D1' and isPaid=1 and RegDate >='2016-10-01 00:00:01' and isPushMsg >= " + this.numOfRenewD1 + "");
+        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE Status ='2' and PackageID = 'D1' and isPaid=1 and RegDate >='"+startDatePushWarningMsg+"' and isPushMsg >= " + this.numOfRenewD1 + "");
         ResultSet rs = pstm.executeQuery();
         if (rs != null) {
             list = new ArrayList<Service>();
@@ -419,7 +420,7 @@ public class ServiceDAO {
         ArrayList<Service> list = null;
         Database DB = new Database();
         Connection conn = DB.connection();
-        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE Status ='2' and PackageID = 'D7' and RegDate >='2016-10-01 00:00:01' and isPaid=1 and isPushMsg >= " + this.numOfRenewD7 + "");
+        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE Status ='2' and PackageID = 'D7' and RegDate >='"+startDatePushWarningMsg+"' and isPaid=1 and isPushMsg >= " + this.numOfRenewD7 + "");
         ResultSet rs = pstm.executeQuery();
         if (rs != null) {
             list = new ArrayList<Service>();
@@ -469,7 +470,7 @@ public class ServiceDAO {
         ArrayList<Service> list = null;
         Database DB = new Database();
         Connection conn = DB.connection();
-        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE Status ='2' and PackageID = 'D30' and RegDate >='2016-10-01 00:00:01' and isPaid=1 and isPushMsg >= " + this.numOfRenewD30 + "");
+        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE Status ='2' and PackageID = 'D30' and RegDate >='"+startDatePushWarningMsg+"' and isPaid=1 and isPushMsg >= " + this.numOfRenewD30 + "");
         ResultSet rs = pstm.executeQuery();
         if (rs != null) {
             list = new ArrayList<Service>();
