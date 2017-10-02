@@ -77,7 +77,7 @@ public class CheckDebit extends Thread {
                             cdr.setCpid("001");
                             cdr.setDebitTime(new Date());
                             cdr.setEventID(Ultils.getCategoryId(sv.getPackageID(), 6));
-                            cdr.setInformation("mDealCharging");
+                            cdr.setInformation(sv.getRegisterChannel()+".DK."+sv.getPackageID());
                             cdr.setIsPushed(false);
                             cdr.setMsisdn(sv.getPhone());
                             cdr.setShortCode("049193");

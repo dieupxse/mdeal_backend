@@ -104,7 +104,7 @@ public class VasGateApiNew {
                 return response;
             }
             ServiceProcess sm = new ServiceProcess();
-            String extra = "Kenhphanphoi-" + packageCode + "-mDeal-Ctnet";
+            String extra = "KPP-" + packageCode;
             if (charging == null) {
                 charging = new Charging();
             }

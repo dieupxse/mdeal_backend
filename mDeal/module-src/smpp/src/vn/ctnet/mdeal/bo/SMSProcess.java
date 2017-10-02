@@ -183,7 +183,7 @@ public class SMSProcess {
                             cdr.setContentID(vn.ctnet.mdeal.config.Utils.getCategoryId(pack.getPackageID(), 10));
                             cdr.setCost(pack.getPrice());
                             cdr.setChannelType("VAS");
-                            cdr.setInformation("MdealVasCharging");
+                            cdr.setInformation(chanel+".DK."+pack.getPackageID());
                             cdr.setDebitTime(new Date());
                             cdr.setIsPushed(false);
 
@@ -1035,7 +1035,7 @@ public class SMSProcess {
         }
     }
     
-    public void QueueConfirmRegister(String msisdn, String pkg, long smsId) {
+    public void QueueConfirmRegister(String msisdn, String pkg, long smsId, boolean isSentMt) {
         int confirmExpAfterMinute = Integer.parseInt(getValue("confirm_exp_after_minute"));
         vn.ctnet.entity.Package pack;
         try 
@@ -1081,7 +1081,10 @@ public class SMSProcess {
                     msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
                     SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
                     msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
-                    sendSMS(msisdn, "mDeal", msg, smsId);
+                    if(isSentMt) {
+                        sendSMS(msisdn, "mDeal", msg, smsId);
+                    }
+                    
                 }
                 /*
                 Nếu gói cước tồn tại nhưng đã hết hạn sử dụng add queue register
@@ -1108,14 +1111,20 @@ public class SMSProcess {
                         msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
                         msg = msg.replace("{PHUT}", confirmExpAfterMinute+"");
                         System.out.println(msg);
-                        sendSMS(msisdn, "9193", msg, smsId);
+                        if(isSentMt) {
+                            sendSMS(msisdn, "9193", msg, smsId);
+                        }
+                        
                         return;
                     } 
                     catch(Exception e) 
                     {
                         System.err.println(e.getMessage());
                          String msg = getSms("msg_err_sys");
-                         sendSMS(msisdn, "9193", msg, smsId);
+                         if(isSentMt) {
+                             sendSMS(msisdn, "9193", msg, smsId);
+                         }
+                         
                     }
                     return;
                 }
@@ -1154,14 +1163,20 @@ public class SMSProcess {
                         msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
                         msg = msg.replace("{FREE}", free_day + "");
                         System.out.println(msg);
-                        sendSMS(msisdn, "9193", msg, smsId);
+                        
+                        if(isSentMt) {
+                            sendSMS(msisdn, "9193", msg, smsId);
+                        }
                         return;
                     } 
                     catch(Exception ex) 
                     {
                         System.err.println("Free: "+ex.getMessage());
                          String msg = getSms("msg_err_sys");
-                         sendSMS(msisdn, "9193", msg, smsId);
+                         if(isSentMt) {
+                             sendSMS(msisdn, "9193", msg, smsId);
+                         }
+                         
                     }
                     return;
             }
@@ -1172,11 +1187,16 @@ public class SMSProcess {
             e.printStackTrace();
             String msg = getSms("msg_wrong");
             msg = msg.replace("{GOI}", pkg);
-            sendSMS(msisdn, "9193", msg, smsId);
+            if(isSentMt) {
+                sendSMS(msisdn, "9193", msg, smsId);
+            }
+            
             
         }
     }
-    
+    public void QueueConfirmRegister(String msisdn, String pkg, long smsId) {
+        QueueConfirmRegister(msisdn, pkg, smsId, true);
+    }
     public void RegisterAccepted(String msisdn, String pkg, long smsId, String chanel, Charging chargin) throws ClassNotFoundException, SQLException {
         ArrayList<QueueRequest> qr = QueueDAO.GetQueueByParam(msisdn, ("REGISTER_"+pkg),0);
              if(qr!=null && qr.size()>0) {

@@ -56,7 +56,7 @@ public class RenewService extends Thread {
                             cdr.setCpid("001");
                             cdr.setDebitTime(new Date());
                             cdr.setEventID(Ultils.getCategoryId(sv.getPackageID(), 6));
-                            cdr.setInformation("mDealCharging");
+                            cdr.setInformation("SYS.GH."+pkg.getPackageID());
                             cdr.setIsPushed(false);
                             cdr.setMsisdn(sv.getPhone());
                             cdr.setShortCode("049193");

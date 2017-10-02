@@ -10,6 +10,8 @@
             <file>file:/D:/DATA/GIT/mdeal_backend/mDeal/module-src/gia-han/src/vn/ctnet/process/CheckDebit.java</file>
             <file>file:/D:/DATA/GIT/mdeal_backend/mDeal/module-src/gia-han/src/vn/ctnet/process/CheckExpAccount.java</file>
             <file>file:/D:/DATA/GIT/mdeal_backend/mDeal/module-src/gia-han/src/vn/ctnet/process/CancelService.java</file>
+            <file>file:/D:/DATA/GIT/mdeal_backend/mDeal/module-src/gia-han/src/vn/ctnet/process/SendSMS.java</file>
+            <file>file:/D:/DATA/GIT/mdeal_backend/mDeal/module-src/gia-han/src/vn/ctnet/process/RetryRenewService.java</file>
         </group>
     </open-files>
 </project-private>

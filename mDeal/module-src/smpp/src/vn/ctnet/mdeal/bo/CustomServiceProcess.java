@@ -141,7 +141,7 @@ public class CustomServiceProcess {
                         cdr.setContentID(vn.ctnet.mdeal.config.Utils.getCategoryId(pack.getPackageID(), 10));
                         cdr.setCost(pack.getPrice());
                         cdr.setChannelType(chanel);
-                        cdr.setInformation("Charging" + chanel);
+                        cdr.setInformation(chanel+".DK."+pack.getPackageID());
                         cdr.setDebitTime(new Date());
                         cdr.setIsPushed(false);
 

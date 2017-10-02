@@ -167,7 +167,7 @@ public class ServiceProcess {
                         cdr.setContentID(vn.ctnet.mdeal.config.Utils.getCategoryId(pack.getPackageID(), 10));
                         cdr.setCost(pack.getPrice());
                         cdr.setChannelType(chanel);
-                        cdr.setInformation("Charging" + chanel);
+                        cdr.setInformation(chanel+".DK."+pack.getPackageID());
                         cdr.setDebitTime(new Date());
                         cdr.setIsPushed(false);
 
@@ -502,7 +502,11 @@ public class ServiceProcess {
                     cdr.setContentID(vn.ctnet.mdeal.config.Utils.getCategoryId(pack.getPackageID(), 10));
                     cdr.setCost((double) price);
                     cdr.setChannelType(chanel);
-                    cdr.setInformation("Charging" + chanel);
+                    String kpp = "";
+                    if(pack.getPackageID().startsWith("MD")) {
+                        kpp = ":KPP-"+pack.getPackageID();
+                    }
+                    cdr.setInformation(chanel+".DK."+pack.getPackageID()+kpp);
                     cdr.setDebitTime(new Date());
                     cdr.setIsPushed(false);
                     if ("CPS-0000".equals(rs)) {
@@ -906,7 +910,7 @@ public class ServiceProcess {
         }
     }
 
-    public ReturnRegister QueueConfirmRegister(String msisdn, String pkg, String channel) {
+    public ReturnRegister QueueConfirmRegister(String msisdn, String pkg, String channel, boolean isSentMt) {
         ReturnRegister rs = new ReturnRegister();
         vn.ctnet.entity.Package pack;
         try {
@@ -916,47 +920,53 @@ public class ServiceProcess {
                 //sendSMS(msisdn, "9193", msg, smsID);
                 rs.setReturnCode("2");
                 rs.setReturnDesc("GOI CUOC KHONG TON TAI TREN HE THONG");
+                System.out.println(rs.getReturnCode() + "|" + rs.getReturnDesc());
                 return rs;
             }
             try {
 
                 Date d = new Date();
                 vn.ctnet.entity.Service service = serviceDao.getServiceByPhone(msisdn);
-                //serviec co roi
-                if ( //huy dich vu khi dich vu dang hoat dong
-                        (d.before(service.getExpDate()) //con han su dung
-                        && (!service.getStatus().equals("0")) //trang thai dang kich hoat
-                        && service.getPackageID().equals(pack.getPackageID())//goi cuoc co ton tai
-                        )
-                        || (service.getStatus().equals("4") //trang thai dang kich hoat
-                        && service.getPackageID().equals(pack.getPackageID())//goi cuoc co ton tai
-                        )) {
+                if (service != null && service.getPhone() != null && !service.getPhone().equals("")) {
+                    if ((d.before(service.getExpDate()) //con han su dung
+                            && (!service.getStatus().equals("0")) //trang thai dang kich hoat
+                            && service.getPackageID().equals(pack.getPackageID())//goi cuoc co ton tai
+                            )
+                            || (service.getStatus().equals("4") //trang thai dang kich hoat
+                            && service.getPackageID().equals(pack.getPackageID())//goi cuoc co ton tai
+                            )) {
 
-                    /*String msg = getSms("msg_huy_ok");
-                    msg = msg.replace("{GOI}", pack.getPackageID());
-                    msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
-                    msg = msg.replace("{GIA}", String.format(Locale.US, "%,d", ((int) pack.getPrice())).replace(',', '.'));
-                    SimpleDateFormat fm = new SimpleDateFormat("dd/MM/yyyy");
-                    msg = msg.replace("{DATE}", fm.format(service.getExpDate()));
-                    sendSMS(msisdn, "9193", msg, smsID);*/
-                    rs.setReturnCode("0");
-                    rs.setReturnDesc("GOI CUOC DA TON TAI VA DANG KHA DUNG TREN HE THONG");
-                    rs.setPackageId(pkg);
-                    rs.setPrice((int) pack.getPrice());
-                    return rs;
+                        rs.setReturnCode("0");
+                        rs.setReturnDesc("GOI CUOC DA TON TAI VA DANG KHA DUNG TREN HE THONG");
+                        rs.setPackageId(pkg);
+                        rs.setPrice((int) pack.getPrice());
+                        System.out.println(rs.getReturnCode() + "|" + rs.getReturnDesc());
+
+                        return rs;
+                    } else {
+
+                        SMSProcess exe = new SMSProcess();
+                        exe.QueueConfirmRegister(msisdn, pkg, 0, isSentMt);
+                        rs.setReturnCode("1");
+                        rs.setReturnDesc("DANG KY LAI");
+                        System.out.println(rs.getReturnCode() + "|" + rs.getReturnDesc());
+                        return rs;
+                    }
                 } else {
-
                     SMSProcess exe = new SMSProcess();
-                    exe.QueueConfirmRegister(msisdn, pkg, 0);
+                    exe.QueueConfirmRegister(msisdn, pkg, 0, isSentMt);
                     rs.setReturnCode("1");
-                    rs.setReturnDesc("CO THE DANG KY GOI CUOC");
+                    rs.setReturnDesc("DANG KY MOI");
+                    System.out.println(rs.getReturnCode() + "|" + rs.getReturnDesc());
                     return rs;
                 }
+                //serviec co roi
 
             } catch (Exception e) {
 
                 rs.setReturnCode("2");
                 rs.setReturnDesc("LOI HE THONG");
+                System.out.println(rs.getReturnCode() + "|" + rs.getReturnDesc() + "|" + e.getMessage());
                 return rs;
             }
         } catch (Exception e) {
@@ -1017,10 +1027,11 @@ public class ServiceProcess {
             return null;
         }
     }
-    
+
     public Service checkProfile(String msisdn, long smsID, String chanel) {
         return checkProfile(msisdn, smsID, chanel, true);
     }
+
     /**
      * Get thong tin thue bao
      *

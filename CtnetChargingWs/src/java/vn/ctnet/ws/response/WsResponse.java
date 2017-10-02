@@ -31,7 +31,7 @@ public class WsResponse {
     public void setReturncode(String returnCode) {
         this.returnCode = returnCode;
     }
-    @XmlElement(name="returndes")
+    @XmlElement(name="returndesc")
     public String getReturndes() {
         return returnDes;
     }

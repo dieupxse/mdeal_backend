@@ -131,19 +131,23 @@ public class ChargingWs {
      *
      * @param msisdn
      * @param packageCode
-     * @param channel
+     * @param isSentMt
      * @return
      */
     @WebMethod(operationName = "QueueConfirmRegister")
     public Reply QueueConfirmRegister(
             @WebParam(name = "msisdn") String msisdn, 
-            @WebParam(name = "packageCode") String packageCode) {
+            @WebParam(name = "packageCode") String packageCode,
+            @WebParam(name = "isSentMt") boolean isSentMt
+    ) {
         //TODO write your implementation code here:
         OutputString output = new OutputString();
         try {
             //   System.out.println("3");
             ServiceProcess sm = new ServiceProcess();
-            ReturnRegister rs = sm.QueueConfirmRegister(initPhoneNumber(msisdn, 3), packageCode, "API");
+            String phone  = initPhoneNumber(msisdn, 3);
+            ReturnRegister rs = sm.QueueConfirmRegister(phone, packageCode, "API",isSentMt);
+            System.out.println(phone+"|"+packageCode+"|"+isSentMt+"|"+rs.getReturnCode());
             //sm.unregister(msisdn, packageCode, 0, "VAS");
             //     System.out.println(rs);
             //     System.out.println("4");
@@ -157,8 +161,6 @@ public class ChargingWs {
      * Web service operation
      *
      * @param msisdn
-     * @param username
-     * @param password
      * @return
      */
     @WebMethod(operationName = "CheckStatus")

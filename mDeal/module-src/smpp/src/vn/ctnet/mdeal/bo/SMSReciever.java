@@ -201,7 +201,6 @@ public class SMSReciever {
                     } else {
                         exe.register(msisdn, "D1", smsID, "SMS", null);
                     }
-
                     break;
 
                 //Dang ky D7
