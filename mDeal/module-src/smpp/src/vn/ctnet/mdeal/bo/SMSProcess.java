@@ -1039,6 +1039,7 @@ public class SMSProcess {
     
     public void QueueConfirmRegister(String msisdn, String pkg, long smsId, boolean isSentMt) {
         int confirmExpAfterMinute = Integer.parseInt(getValue("confirm_exp_after_minute"));
+        int confirmRegisterExpAfterMinute = Integer.parseInt(getValue("confirm_register_exp_after_minute"));
         vn.ctnet.entity.Package pack;
         try 
         {
@@ -1097,16 +1098,16 @@ public class SMSProcess {
                         QueueRequest queueRequest = new QueueRequest();
                         queueRequest.setAction("REGISTER_"+pkg);
                         queueRequest.setCreateDate(new Timestamp(new Date().getTime()));
-                        queueRequest.setExpDate(new Timestamp(vn.ctnet.mdeal.config.Utils.addMinute(confirmExpAfterMinute).getTime()));
+                        queueRequest.setExpDate(new Timestamp(vn.ctnet.mdeal.config.Utils.addMinute(confirmRegisterExpAfterMinute).getTime()));
                         queueRequest.setPhone(msisdn);
                         queueRequest.setStatus(false);
                         
                         QueueDAO.insert(queueRequest);
-                        System.out.println("Insert queue thanh cong");
+                        System.out.println("Insert queue thanh cong, exp after "+confirmRegisterExpAfterMinute +" min");
                         /*
                         Gởi thông báo hủy thành công
                         */
-                        String msg = vn.ctnet.common.Constant.MSG_CONFIRM_REGISTER;
+                        String msg = getSms("msg_confirm_register");
                         System.out.println(msg);
                         msg = msg.replace("{GOI}", pack.getPackageID());
                         msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
@@ -1158,7 +1159,7 @@ public class SMSProcess {
                         Gởi thông báo hủy thành công
                         */
                         int free_day = Integer.parseInt(getValue("free_day"));
-                        String msg = vn.ctnet.common.Constant.MSG_CONFIRM_REGISTER_FREE;
+                        String msg = getSms("msg_confirm_register_free");
                         System.out.println(msg);
                         msg = msg.replace("{GOI}", pack.getPackageID());
                         msg = msg.replace("{NGAY}", pack.getNumOfDate() + "");
@@ -1216,7 +1217,7 @@ public class SMSProcess {
                         String at = ""+qur.getAction();
                         String pk = "";
                         if(at.contains("REGISTER_")) {
-                            String[] dt = at.split("");
+                            String[] dt = at.split("_");
                             if(dt.length>=2) {
                                 pk = dt[1];
                             }

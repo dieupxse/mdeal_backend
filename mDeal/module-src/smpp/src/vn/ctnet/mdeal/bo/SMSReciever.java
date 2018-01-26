@@ -107,7 +107,7 @@ public class SMSReciever {
                     //do
                     if (action.length >= 2) {
                         if (action[1] == null || "".equals(action[1])) {
-                            action[1] = "";
+                            action[1] = "D1";
                         }
                         if ("1".equals(enable_confirm_register)) {
                             exe.QueueConfirmRegister(msisdn, action[1], 0);
@@ -152,7 +152,7 @@ public class SMSReciever {
                 //xac nhan dang ky goi cuoc
                 case "Y":
 
-                    String pkag = "D1";
+                    String pkag = "";
                     if ("".equals(action[1]) || action[1] == null) {
                         pkag = "";
                     }
