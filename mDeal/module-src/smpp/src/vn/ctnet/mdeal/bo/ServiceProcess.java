@@ -97,6 +97,8 @@ public class ServiceProcess {
      * @param smsID
      * @param chanel
      * @param chargin
+     * @param user
+     * @param isAutoRenew
      * @return
      */
     public String register(String msisdn, String packageID, long smsID, String chanel, Charging chargin, String user, boolean isAutoRenew) {
@@ -345,6 +347,8 @@ public class ServiceProcess {
      * @param chanel
      * @param chargin
      * @param username
+     * @param isAutoRenew
+     * @param extra_info
      * @return
      */
     public ReturnRegister register_direct(String msisdn, String packageID, long smsID, String chanel, Charging chargin, String username, boolean isAutoRenew, String extra_info) {
@@ -504,9 +508,9 @@ public class ServiceProcess {
                     cdr.setChannelType(chanel);
                     String kpp = "";
                     if(pack.getPackageID().startsWith("MD")) {
-                        kpp = ":KPP-"+pack.getPackageID();
+                        kpp = "KPP-"+pack.getPackageID();
                     }
-                    cdr.setInformation(chanel+".DK."+pack.getPackageID()+kpp);
+                    cdr.setInformation(kpp.equals("") ? chanel+".DK."+pack.getPackageID() : kpp);
                     cdr.setDebitTime(new Date());
                     cdr.setIsPushed(false);
                     if ("CPS-0000".equals(rs)) {
@@ -681,6 +685,7 @@ public class ServiceProcess {
      * @param packageID
      * @param smsID
      * @param chanel
+     * @param user
      * @return
      */
     public String unregister(String msisdn, String packageID, long smsID, String chanel, String user) {
@@ -982,6 +987,7 @@ public class ServiceProcess {
      * @param msisdn
      * @param smsID
      * @param chanel
+     * @param isSendMt
      * @return
      */
     public Service checkProfile(String msisdn, long smsID, String chanel, boolean isSendMt) {

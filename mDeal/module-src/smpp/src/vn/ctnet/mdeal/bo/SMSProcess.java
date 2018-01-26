@@ -620,6 +620,8 @@ public class SMSProcess {
      * @param chanel 
      * @param charging 
      * @return  
+     * @throws java.lang.ClassNotFoundException  
+     * @throws java.sql.SQLException  
      */
     public boolean checkStatusAndRegister(String msisdn, long smsID, String chanel, Charging charging) throws ClassNotFoundException, SQLException {
         String defaultPackageByGetCode = getValue("default_package_get_code");
@@ -1205,6 +1207,27 @@ public class SMSProcess {
                      QueueDAO.update(q);
                  }
              } else {
+                    qr = QueueDAO.GetQueueByParam(msisdn, 0);
+                    QueueRequest qur = null;
+                    if(qr!=null && qr.size()>0) {
+                        qur = qr.get(0);
+                    }
+                    if(qur!=null) {
+                        String at = ""+qur.getAction();
+                        String pk = "";
+                        if(at.contains("REGISTER_")) {
+                            String[] dt = at.split("");
+                            if(dt.length>=2) {
+                                pk = dt[1];
+                            }
+                            if(!"".equals(pk)) {
+                                String msg = getSms("msg_confirm_wrong");
+                                msg = msg.replace("{GOI}", pk);
+                                sendSMS(msisdn, "9193", msg, smsId);
+                                return;
+                            }
+                        }
+                    }
                     String msg = getSms("msg_wrong");
                     sendSMS(msisdn, "9193", msg, smsId);
                  return;

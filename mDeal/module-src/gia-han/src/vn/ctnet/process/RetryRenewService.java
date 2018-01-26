@@ -143,7 +143,7 @@ public class RetryRenewService extends Thread {
                                         cdrtry.setCpid("001");
                                         cdrtry.setDebitTime(new Date());
                                         cdrtry.setEventID(vn.ctnet.confi.Ultility.getCategoryId(pkd1.getPackageID(), 6));
-                                        cdr.setInformation("SYS.RETRY."+sv.getPackageID());
+                                        cdrtry.setInformation("SYS.RETRY."+sv.getPackageID());
                                         cdrtry.setIsPushed(false);
                                         cdrtry.setMsisdn(sv.getPhone());
                                         cdrtry.setShortCode("049193");

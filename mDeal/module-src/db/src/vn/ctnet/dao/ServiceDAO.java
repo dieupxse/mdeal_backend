@@ -370,7 +370,7 @@ public class ServiceDAO {
         ArrayList<Service> list = null;
         Database DB = new Database();
         Connection conn = DB.connection();
-        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE Status ='2' and PackageID = 'D1' and isPaid=1 and RegDate >='"+startDatePushWarningMsg+"' and isPushMsg >= " + this.numOfRenewD1 + "");
+        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE Status ='2' and (PackageID = 'D1' or PackageID = 'MD1') and isPaid=1 and RegDate >='"+startDatePushWarningMsg+"' and isPushMsg >= " + this.numOfRenewD1 + "");
         ResultSet rs = pstm.executeQuery();
         if (rs != null) {
             list = new ArrayList<Service>();
@@ -420,7 +420,7 @@ public class ServiceDAO {
         ArrayList<Service> list = null;
         Database DB = new Database();
         Connection conn = DB.connection();
-        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE Status ='2' and PackageID = 'D7' and RegDate >='"+startDatePushWarningMsg+"' and isPaid=1 and isPushMsg >= " + this.numOfRenewD7 + "");
+        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE Status ='2' and (PackageID = 'D7' or PackageID = 'MD7') and RegDate >='"+startDatePushWarningMsg+"' and isPaid=1 and isPushMsg >= " + this.numOfRenewD7 + "");
         ResultSet rs = pstm.executeQuery();
         if (rs != null) {
             list = new ArrayList<Service>();
@@ -470,7 +470,7 @@ public class ServiceDAO {
         ArrayList<Service> list = null;
         Database DB = new Database();
         Connection conn = DB.connection();
-        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE Status ='2' and PackageID = 'D30' and RegDate >='"+startDatePushWarningMsg+"' and isPaid=1 and isPushMsg >= " + this.numOfRenewD30 + "");
+        PreparedStatement pstm = conn.prepareStatement(sql = "SELECT * FROM SERVICE WHERE Status ='2' and (PackageID = 'D30' or PackageID = 'MD30' ) and RegDate >='"+startDatePushWarningMsg+"' and isPaid=1 and isPushMsg >= " + this.numOfRenewD30 + "");
         ResultSet rs = pstm.executeQuery();
         if (rs != null) {
             list = new ArrayList<Service>();

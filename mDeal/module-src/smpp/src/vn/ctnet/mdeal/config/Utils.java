@@ -98,6 +98,7 @@ public class Utils {
            }
            pkid = pkid.toUpperCase();
            pkid = pkid.replace("D", "");
+           pkid = pkid.replace("M", "");
            rs="";
            for(int k = 0; k<len - pkid.length();k++) {
                rs+='0';

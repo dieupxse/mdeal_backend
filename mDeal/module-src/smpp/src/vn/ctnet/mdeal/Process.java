@@ -6,8 +6,6 @@
 package vn.ctnet.mdeal;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Date;
 import org.jsmpp.InvalidResponseException;
 import org.jsmpp.PDUException;
 import org.jsmpp.bean.Alphabet;

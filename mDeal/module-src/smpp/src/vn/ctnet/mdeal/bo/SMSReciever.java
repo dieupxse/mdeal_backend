@@ -42,6 +42,7 @@ public class SMSReciever {
      * @param message
      * @param msisdn
      * @param destAdd
+     * @param charging
      * @return
      */
     public String recieverSMS(String message, String msisdn, String destAdd, Charging charging) {
@@ -73,6 +74,7 @@ public class SMSReciever {
      * @param message
      * @param msisdn
      * @param smsID
+     * @param charging
      * @return
      * @throws ClassNotFoundException
      * @throws SQLException
@@ -152,10 +154,9 @@ public class SMSReciever {
 
                     String pkag = "D1";
                     if ("".equals(action[1]) || action[1] == null) {
-                        pkag = "D1";
-                    } else {
-                        pkag = action[1].toUpperCase();
+                        pkag = "";
                     }
+                    pkag = action[1];
                     exe.RegisterAccepted(msisdn, pkag, smsID, "SMS", null);
                     break;
                 /*

@@ -446,8 +446,8 @@ public class Charging extends Thread {
             avpSet.addAvp(10113, categoryId, true, false, true);
             avpSet.addAvp(10114, contentId, true, false, true);
             avpSet.addAvp(10115, Utilities.CHARGING_PROXY_SHORT_CODE, true, false, true);
-            avpSet.addAvp(10116, bsisdn, true, false, true);
-            avpSet.addAvp(10117,((null==extra_info || "".equals(extra_info)) ? "" : extra_info ),true, false, true);
+            avpSet.addAvp(10116, (null==extra_info || "".equals(extra_info)) ? bsisdn : extra_info, true, false, true);
+            //avpSet.addAvp(10117,((null==extra_info || "".equals(extra_info)) ? "" : extra_info ),true, false, true);
 //            avpSet.addAvp(20000, Utilities.IP_LOCAL, true, false, false);
 //            avpSet.addAvp(20001, sessionId, true, false, false);
 
@@ -590,8 +590,8 @@ public class Charging extends Thread {
             avpSet.addAvp(10113, categoryId, true, false, true);
             avpSet.addAvp(10114, contentId, true, false, true);
             avpSet.addAvp(10115, Utilities.CHARGING_PROXY_SHORT_CODE, true, false, true);
-            avpSet.addAvp(10116, bsisdn, true, false, true);
-            avpSet.addAvp(10117,((null==extra_info || "".equals(extra_info)) ? "" : extra_info ),true, false, true);
+            avpSet.addAvp(10116, (null==extra_info || "".equals(extra_info)) ? bsisdn : extra_info, true, false, true);
+            //avpSet.addAvp(10117,((null==extra_info || "".equals(extra_info)) ? "" : extra_info ),true, false, true);
             Future<Message> future = session.send(request);
             Answer response = (Answer) future.get();
 

@@ -7,7 +7,6 @@ package vn.ctnet.charging.ws.vasgate;
 
 import charging.Charging;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import javax.annotation.Resource;
 import javax.jws.WebService;
@@ -16,7 +15,6 @@ import javax.jws.WebParam;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
-import vn.ctnet.config.OutputString;
 import vn.ctnet.dao.PackageDAO;
 import vn.ctnet.dao.UsersDao;
 import vn.ctnet.dao.VasLogDAO;
@@ -108,7 +106,7 @@ public class VasGateApiNew {
             if (charging == null) {
                 charging = new Charging();
             }
-            ReturnRegister rs = sm.register_direct(initPhoneNumber(msisdn, 3), packageCode, 0, channel, charging, userName, true, extra);
+            ReturnRegister rs = sm.register_direct(initPhoneNumber(msisdn, 1), packageCode, 0, channel, charging, userName, true, extra);
             response.setReturncode(rs.getReturnCode());
             response.setReturndes(rs.getReturnDesc());
             Pkg pkg = new Pkg(rs.getPackageId(), pack.getNumOfDate(), rs.getPrice(), packageCode);
@@ -139,7 +137,7 @@ public class VasGateApiNew {
      *
      * @param msisdn
      * @param packageCode
-     * @param username
+     * @param userName
      * @param password
      * @return
      */
@@ -181,7 +179,7 @@ public class VasGateApiNew {
             }
             //   System.out.println("3");
             ServiceProcess sp = new ServiceProcess();
-            Service sv = sp.getService(initPhoneNumber(msisdn, 3));
+            Service sv = sp.getService(initPhoneNumber(msisdn, 1));
 
             if (sv == null || sv.getPackageID() == null) {
                 try {
@@ -248,7 +246,7 @@ public class VasGateApiNew {
      * Web service operation
      *
      * @param msisdn
-     * @param username
+     * @param userName
      * @param password
      * @return
      */
@@ -272,7 +270,7 @@ public class VasGateApiNew {
         log.setChannel("VAS_API_NEW");
         try {
             ServiceProcess sm = new ServiceProcess();
-            Service rs = sm.checkProfile(initPhoneNumber(msisdn, 3), 0, "VAS",false);
+            Service rs = sm.checkProfile(initPhoneNumber(msisdn, 1), 0, "VAS",false);
             System.out.println("Web service check " + msisdn);
             if (rs != null) {
                 System.out.println("get service ok");
@@ -315,29 +313,30 @@ public class VasGateApiNew {
 
     private String initPhoneNumber(String phone, int type) {
         //using for smpp
-        if (type == 1) {
-            if (phone.startsWith("0")) {
-                return phone.replaceFirst("0", "84");
-            } else if (phone.startsWith("84")) {
-                return phone;
-            } else if (phone.startsWith("+84")) {
-                return phone.replace("+", "");
-            } else {
-                return phone;
-            }
-        } //using for chargin proxy
-        else if (type == 2) {
-            if (phone.startsWith("0")) {
-                return phone.replaceFirst("0", "");
-            } else if (phone.startsWith("84")) {
-                return phone.replaceFirst("84", "");
-            } else if (phone.startsWith("+84")) {
-                return phone.replace("+84", "");
-            } else {
-                return phone;
-            }
-        } else {
-            return "84" + phone;
+        switch (type) {
+        //using for chargin proxy
+            case 1:
+                if (phone.startsWith("0")) {
+                    return phone.replaceFirst("0", "84");
+                } else if (phone.startsWith("84")) {
+                    return phone;
+                } else if (phone.startsWith("+84")) {
+                    return phone.replace("+", "");
+                } else {
+                    return "84"+phone;
+                }
+            case 2:
+                if (phone.startsWith("0")) {
+                    return phone.replaceFirst("0", "");
+                } else if (phone.startsWith("84")) {
+                    return phone.replaceFirst("84", "");
+                } else if (phone.startsWith("+84")) {
+                    return phone.replace("+84", "");
+                } else {
+                    return phone;
+                }
+            default:
+                return "84" + phone;
         }
     }
 
